@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 
-const index = () => {
+const MyPageScreen = () => {
   return (
     <View>
       <Text>마이페이지</Text>
@@ -8,4 +8,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default MyPageScreen;
