@@ -1,6 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import theme from '../../styles/theme';
 import { NavigationArrow, Setting } from '../../assets/svgs/icons';
+import React from 'react';
 
 interface ButtonProps {
   buttonType: 'action' | 'full' | 'setting' | 'floating';
@@ -8,7 +9,7 @@ interface ButtonProps {
   onClick: () => void;
 }
 
-const Button = ({ buttonType, children, onClick }: ButtonProps) => {
+const Button: React.FC<ButtonProps> = ({ buttonType, children, onClick }: ButtonProps) => {
   return (
     <TouchableOpacity
       style={
