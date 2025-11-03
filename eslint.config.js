@@ -62,6 +62,8 @@ module.exports = defineConfig([
       'react-native/no-color-literals': 'warn',
       '@typescript-eslint/no-unused-vars': 'warn',
       'react-native/no-raw-text': 'off',
+      'react-native/no-unused-styles': 'off',
+      'react-native/sort-styles': 'off',
 
       'prettier/prettier': [
         'error',
