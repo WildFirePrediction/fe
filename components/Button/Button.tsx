@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleProp, StyleSheet, Text, TouchableOpacity, ViewStyle } from 'react-native';
 import theme from '../../styles/theme';
 import { NavigationArrow, Setting } from '../../assets/svgs/icons';
 import React from 'react';
@@ -7,20 +7,27 @@ interface ButtonProps {
   buttonType: 'action' | 'full' | 'setting' | 'floating';
   children: string;
   onClick: () => void;
+  customStyle?: StyleProp<ViewStyle>;
 }
 
-const Button: React.FC<ButtonProps> = ({ buttonType, children, onClick }: ButtonProps) => {
+const Button: React.FC<ButtonProps> = ({
+  buttonType,
+  children,
+  onClick,
+  customStyle,
+}: ButtonProps) => {
   return (
     <TouchableOpacity
-      style={
+      style={[
         buttonType === 'action'
           ? style.actionButtonStyle
           : buttonType === 'setting'
             ? style.settingButtonStyle
             : buttonType === 'full'
               ? style.fullButtonStyle
-              : style.floatingButtonStyle
-      }
+              : style.floatingButtonStyle,
+        customStyle,
+      ]}
       onPress={onClick}
     >
       {(buttonType === 'setting' && <Setting />) ||

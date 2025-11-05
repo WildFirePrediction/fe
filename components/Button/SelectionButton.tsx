@@ -37,9 +37,11 @@ const style = StyleSheet.create({
   },
   selectedButtonTextStyle: {
     color: theme.color.white,
+    fontSize: 16,
   },
   unselectedButtonTextStyle: {
     color: theme.color.darkGray2,
+    fontSize: 16,
   },
 });
 
