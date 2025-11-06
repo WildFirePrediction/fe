@@ -18,6 +18,9 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.seoyeonyu.CAPSTONE25FE',
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+      },
     },
     android: {
       adaptiveIcon: {
@@ -31,10 +34,14 @@ export default {
     web: {
       favicon: './assets/favicon.png',
     },
+    extra: {
+      eas: {
+        projectId: 'ddff9a63-1aeb-4f7f-bc6d-96d0f3863e57',
+      },
+    },
     plugins: [
       'expo-router',
       'expo-secure-store',
-      'expo-build-properties',
       [
         '@mj-studio/react-native-naver-map',
         {
@@ -52,6 +59,8 @@ export default {
       [
         'expo-location',
         {
+          locationAlwaysPermission:
+            'We use your location to see how far you are from spots, and also to show you your position in the map',
           locationAlwaysAndWhenInUsePermission: 'Allow WildfirePrediction to use your location.',
           locationWhenInUsePermission:
             'Allow WildfirePrediction to use your location while you are using the app.',
