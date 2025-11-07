@@ -1,6 +1,6 @@
 import { StyleProp, StyleSheet, Text, TouchableOpacity, ViewStyle } from 'react-native';
 import theme from '../../styles/theme';
-import { NavigationArrow, Setting } from '../../assets/svgs/icons';
+import { NavigationArrow, SettingIcon } from '../../assets/svgs/icons';
 import React from 'react';
 
 interface ButtonProps {
@@ -30,7 +30,7 @@ const Button: React.FC<ButtonProps> = ({
       ]}
       onPress={onClick}
     >
-      {(buttonType === 'setting' && <Setting />) ||
+      {(buttonType === 'setting' && <SettingIcon />) ||
         (buttonType === 'floating' && <NavigationArrow />)}
       <Text
         style={
@@ -112,8 +112,8 @@ const style = StyleSheet.create({
     fontWeight: 700,
   },
   floatingButtonIconStyle: {
-    width: 23,
-    height: 27,
+    width: 20,
+    height: 23,
     color: theme.color.white,
   },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import theme from '../../styles/theme';
-import { Location } from '../../assets/svgs/icons';
+import { LocationIcon } from '../../assets/svgs/icons';
 
 interface MapButtonProps {
   onClick: () => void;
@@ -9,7 +9,7 @@ interface MapButtonProps {
 const MapButton: React.FC<MapButtonProps> = ({ onClick }: MapButtonProps) => {
   return (
     <TouchableOpacity style={style.buttonStyle} onPress={onClick}>
-      <Location />
+      <LocationIcon />
     </TouchableOpacity>
   );
 };
