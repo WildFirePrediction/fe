@@ -10,8 +10,10 @@ import theme from '../../styles/theme';
 import { RainIcon } from '../../assets/svgs/icons';
 import { coordsFire, coordsFirePredict } from '../../mock/fireAreaData';
 import { myRegionData } from '../../mock/myRegionsData';
+import { useRouter } from 'expo-router';
 
 const WildFireMapScreen = () => {
+  const router = useRouter();
   const [selectedRegion, setSelectedRegion] = useState(myRegionData.at(0));
   const [camera, setCamera] = useState<Camera | undefined>(myRegionData.at(0));
 
@@ -24,7 +26,9 @@ const WildFireMapScreen = () => {
     setCamera(region ? { ...region, zoom: 12 } : region);
   };
 
-  const handleSetRegion = () => {};
+  const handleSetRegion = () => {
+    router.push('/regionSetting');
+  };
 
   useEffect(() => {
     (async () => {
