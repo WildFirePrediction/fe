@@ -3,22 +3,33 @@ import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Button, SelectionButton } from '../../components';
+import { Button, MapButton, SelectionButton } from '../../components';
 import * as Location from 'expo-location';
-import { Camera, NaverMapPolygonOverlay, NaverMapView } from '@mj-studio/react-native-naver-map';
+import {
+  Camera,
+  NaverMapPolygonOverlay,
+  NaverMapView,
+  NaverMapViewRef,
+} from '@mj-studio/react-native-naver-map';
 import theme from '../../styles/theme';
 import { RainIcon } from '../../assets/svgs/icons';
 import { coordsFire, coordsFirePredict } from '../../mock/fireAreaData';
 import { myRegionData } from '../../mock/myRegionsData';
 import { useRouter } from 'expo-router';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 const WildFireMapScreen = () => {
   const router = useRouter();
+  const mapRef = useRef<NaverMapViewRef>(null);
+
   const [selectedRegion, setSelectedRegion] = useState(myRegionData.at(0));
   const [camera, setCamera] = useState<Camera | undefined>(myRegionData.at(0));
+  const bottomSheetPosition = useSharedValue<number>(0);
 
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const handleSheetChanges = () => {};
+  const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
+    top: bottomSheetPosition.value - 150,
+    position: 'absolute',
+  }));
 
   const handleSelectRegion = (regionName: string) => {
     const region = myRegionData.find(myRegion => myRegion.name === regionName);
@@ -28,6 +39,20 @@ const WildFireMapScreen = () => {
 
   const handleSetRegion = () => {
     router.push('/regionSetting');
+  };
+
+  const moveToCurrentLocation = async () => {
+    try {
+      const position = await Location.getCurrentPositionAsync();
+
+      mapRef.current?.animateCameraTo({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        zoom: 12,
+      });
+    } catch (error) {
+      console.error('Cannot get location information:', error);
+    }
   };
 
   useEffect(() => {
@@ -46,14 +71,7 @@ const WildFireMapScreen = () => {
   return (
     <GestureHandlerRootView>
       <SafeAreaView style={style.container}>
-        <NaverMapView
-          style={{ flex: 1 }}
-          camera={camera}
-          isShowLocationButton={true}
-          locationOverlay={{
-            isVisible: true,
-          }}
-        >
+        <NaverMapView ref={mapRef} style={{ flex: 1 }} camera={camera} isShowLocationButton={false}>
           <NaverMapPolygonOverlay
             coords={coordsFire}
             color={theme.color.mainTransparent}
@@ -67,11 +85,16 @@ const WildFireMapScreen = () => {
             outlineWidth={1}
           />
         </NaverMapView>
+        <Animated.View style={[style.floatingButtonsContainer, floatingButtonsAnimatedStyle]}>
+          <MapButton onClick={moveToCurrentLocation} />
+          <Button buttonType="floating" onClick={() => {}}>
+            대피 안내
+          </Button>
+        </Animated.View>
         <BottomSheet
           style={style.bottomSheet}
-          ref={bottomSheetRef}
-          onChange={handleSheetChanges}
-          enablePanDownToClose={true}
+          snapPoints={['10%', 200]}
+          animatedPosition={bottomSheetPosition}
         >
           <BottomSheetView style={style.bottomSheetView}>
             <View style={style.bottomSheetRegionButtonsContainer}>
@@ -101,9 +124,6 @@ const WildFireMapScreen = () => {
             </View>
           </BottomSheetView>
         </BottomSheet>
-        <Button buttonType="floating" onClick={() => {}} customStyle={style.navigateButtonStyle}>
-          대피 안내
-        </Button>
       </SafeAreaView>
     </GestureHandlerRootView>
   );
@@ -157,10 +177,11 @@ const style = StyleSheet.create({
   bottomSheetInformationContentStyle: {
     fontSize: 16,
   },
-  navigateButtonStyle: {
+  floatingButtonsContainer: {
     position: 'absolute',
-    bottom: 220,
     right: 10,
     alignSelf: 'flex-end',
+    alignItems: 'flex-end',
+    gap: 20,
   },
 });
