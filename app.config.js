@@ -10,6 +10,7 @@ export default {
     icon: './assets/icon.png',
     userInterfaceStyle: 'light',
     newArchEnabled: true,
+    scheme: 'capstone25fe',
     splash: {
       image: './assets/splash-icon.png',
       resizeMode: 'contain',
@@ -46,6 +47,11 @@ export default {
         '@mj-studio/react-native-naver-map',
         {
           client_id: process.env.NAVER_CLIENT_ID ?? '',
+          android: {
+            ACCESS_FINE_LOCATION: true,
+            ACCESS_COARSE_LOCATION: true,
+            ACCESS_BACKGROUND_LOCATION: true,
+          },
         },
       ],
       [
