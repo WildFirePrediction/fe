@@ -6,14 +6,16 @@ import { Button } from '../components';
 import { myRegionData } from '../mock/myRegionsData';
 import { useRouter } from 'expo-router';
 
-const LocaitonSetting = () => {
+const RegionSetting = () => {
   const router = useRouter();
 
   const handleAddRegion = () => {
     router.push('/regionSearch');
   };
 
-  const handleDeleteRegion = () => {};
+  const handleDeleteRegion = () => {
+    /* TODO: 내 지역 삭제 API 호출 및 상태 업데이트 */
+  };
 
   return (
     <SafeAreaView style={style.background}>
@@ -23,7 +25,8 @@ const LocaitonSetting = () => {
       </View>
       <View style={style.contentContainer}>
         <Text style={style.descriptionText}>
-          내 지역은 <Text style={style.descriptionHighlightText}>3개</Text>까지 설정 가능합니다
+          내 지역은 <Text style={style.descriptionHighlightText}>{myRegionData.length}개</Text>까지
+          설정 가능합니다
         </Text>
         <View style={style.regionListContainer}>
           {myRegionData.map(region => (
@@ -44,7 +47,7 @@ const LocaitonSetting = () => {
     </SafeAreaView>
   );
 };
-export default LocaitonSetting;
+export default RegionSetting;
 
 const style = StyleSheet.create({
   background: {
