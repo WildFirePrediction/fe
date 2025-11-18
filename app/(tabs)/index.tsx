@@ -28,7 +28,6 @@ const WildFireMapScreen = () => {
 
   const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
     top: bottomSheetPosition.value - 150,
-    position: 'absolute',
   }));
 
   const handleSelectRegion = (regionName: string) => {
@@ -39,6 +38,10 @@ const WildFireMapScreen = () => {
 
   const handleSetRegion = () => {
     router.push('/regionSetting');
+  };
+
+  const handleNavigateToEvacuation = () => {
+    /* TODO: 대피안내 페이지로 navigate */
   };
 
   const moveToCurrentLocation = async () => {
@@ -87,7 +90,7 @@ const WildFireMapScreen = () => {
         </NaverMapView>
         <Animated.View style={[style.floatingButtonsContainer, floatingButtonsAnimatedStyle]}>
           <MapButton onClick={moveToCurrentLocation} />
-          <Button buttonType="floating" onClick={() => {}}>
+          <Button buttonType="floating" onClick={() => handleNavigateToEvacuation()}>
             대피 안내
           </Button>
         </Animated.View>
