@@ -1,4 +1,7 @@
 import 'dotenv/config';
+if (!process.env.NAVER_CLIENT_ID) {
+  throw new Error('NAVER_CLIENT_ID is not set');
+}
 
 export default {
   expo: {
@@ -46,7 +49,7 @@ export default {
       [
         '@mj-studio/react-native-naver-map',
         {
-          client_id: process.env.NAVER_CLIENT_ID ?? '',
+          client_id: process.env.NAVER_CLIENT_ID,
           android: {
             ACCESS_FINE_LOCATION: true,
             ACCESS_COARSE_LOCATION: true,
@@ -65,11 +68,9 @@ export default {
       [
         'expo-location',
         {
-          locationAlwaysPermission:
-            'We use your location to see how far you are from spots, and also to show you your position in the map',
-          locationAlwaysAndWhenInUsePermission: 'Allow WildfirePrediction to use your location.',
-          locationWhenInUsePermission:
-            'Allow WildfirePrediction to use your location while you are using the app.',
+          locationAlwaysPermission: '위치정보를 사용하도록 허용해주세요.',
+          locationAlwaysAndWhenInUsePermission: '위치 정보를 사용하도록 허용해주세요.',
+          locationWhenInUsePermission: '앱을 사용하는 동안 위치 정보를 사용하도록 허용해주세요.',
         },
       ],
     ],
