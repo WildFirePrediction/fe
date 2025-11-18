@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CancelIcon, RegionItemDeleteIcon } from '../assets/svgs/icons';
 import theme from '../styles/theme';
@@ -18,8 +18,8 @@ const LocaitonSetting = () => {
   return (
     <SafeAreaView style={style.background}>
       <View style={style.header}>
-        <Text style={style.headerText}>지역 설정</Text>
         <CancelIcon style={style.headerCancelButton} onPress={() => router.back()} />
+        <Text style={style.headerText}>지역 설정</Text>
       </View>
       <View style={style.contentContainer}>
         <Text style={style.descriptionText}>
@@ -29,7 +29,9 @@ const LocaitonSetting = () => {
           {myRegionData.map(region => (
             <View style={style.regionItem} key={region.name}>
               <Text style={style.regionItemText}>{region.name}</Text>
-              <RegionItemDeleteIcon onPress={() => handleDeleteRegion()} />
+              <TouchableOpacity onPress={() => handleDeleteRegion()}>
+                <RegionItemDeleteIcon style={style.regionDeleteButtonIcon} />
+              </TouchableOpacity>
             </View>
           ))}
         </View>
@@ -53,31 +55,35 @@ const style = StyleSheet.create({
   },
   header: {
     width: '100%',
-    marginTop: 36,
+    marginTop: 15,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerText: {
-    fontSize: 32,
+    fontSize: 20,
     position: 'absolute',
+    fontWeight: 'bold',
   },
   headerCancelButton: {
-    marginLeft: 'auto',
+    width: 15,
+    height: 15,
+    marginRight: 'auto',
     position: 'relative',
   },
   contentContainer: {
+    width: '100%',
     marginTop: 65,
   },
   descriptionText: {
-    fontSize: 24,
+    fontSize: 20,
   },
   descriptionHighlightText: {
     color: theme.color.main,
   },
   regionListContainer: {
     gap: 10,
-    marginTop: 42,
+    marginTop: 30,
   },
   addRegionButton: {
     marginTop: 28,
@@ -90,10 +96,14 @@ const style = StyleSheet.create({
     paddingHorizontal: 13,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: theme.color.darkGray1,
+    borderColor: theme.color.gray,
     backgroundColor: theme.color.lightGray2,
   },
   regionItemText: {
-    fontSize: 24,
+    fontSize: 17,
+  },
+  regionDeleteButtonIcon: {
+    width: 7,
+    height: 7,
   },
 });

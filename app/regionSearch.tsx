@@ -11,6 +11,7 @@ import theme from '../styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { regionSearchData } from '../mock/regionSearchData';
 
 const RegionSearch = () => {
   const router = useRouter();
@@ -41,10 +42,11 @@ const RegionSearch = () => {
           </TouchableOpacity>
         </View>
         <View style={style.searchResultContainer}>
-          <Text style={style.searchResultItem} onPress={() => handlePressItem('동작구 흑석동')}>
-            동작구 흑석동
-          </Text>
-          <Text style={style.searchResultItem}>동작구 흑석동</Text>
+          {regionSearchData.map(region => (
+            <TouchableOpacity key={region} onPress={() => handlePressItem(region)}>
+              <Text style={style.searchResultItem}>{region}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>
@@ -70,12 +72,13 @@ const style = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 15,
     paddingVertical: 10,
-    fontSize: 20,
+    fontSize: 17,
     borderRadius: 5,
     backgroundColor: theme.color.lightGray2,
   },
   searchCancelText: {
-    fontSize: 20,
+    fontSize: 19,
+    color: theme.color.darkGray2,
   },
   searchResultContainer: {
     gap: 20,
@@ -83,6 +86,6 @@ const style = StyleSheet.create({
   },
   searchResultItem: {
     paddingHorizontal: 8,
-    fontSize: 20,
+    fontSize: 17,
   },
 });

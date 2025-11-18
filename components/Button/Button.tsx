@@ -82,12 +82,12 @@ const style = StyleSheet.create({
   },
   fullButtonStyle: {
     paddingVertical: 17,
-    borderRadius: 5,
+    borderRadius: 7,
     backgroundColor: theme.color.main,
     alignItems: 'center',
   },
   fullButtonTextStyle: {
-    fontSize: 20,
+    fontSize: 18,
     color: theme.color.white,
   },
   floatingButtonStyle: {
