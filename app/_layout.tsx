@@ -9,7 +9,8 @@ const RootLayout = () => {
           headerShown: false,
         }}
       />
-      <Stack.Screen name="locationSetting" options={{ headerShown: false }} />
+      <Stack.Screen name="regionSetting" options={{ headerShown: false }} />
+      <Stack.Screen name="regionSearch" options={{ headerShown: false }} />
     </Stack>
   );
 };

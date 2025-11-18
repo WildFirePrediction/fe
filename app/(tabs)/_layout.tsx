@@ -6,21 +6,21 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="index"
         options={{
-          headerTitle: 'whildfireMap',
+          headerShown: false,
           title: '산불지도',
         }}
       />
       <Tabs.Screen
         name="disasterInfo"
         options={{
-          headerTitle: 'disasterInformation',
+          headerShown: false,
           title: '재난 정보',
         }}
       />
       <Tabs.Screen
         name="myPage"
         options={{
-          headerTitle: 'my page',
+          headerShown: false,
           title: '마이페이지',
         }}
       />

@@ -1,29 +1,36 @@
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleProp, StyleSheet, Text, TouchableOpacity, ViewStyle } from 'react-native';
 import theme from '../../styles/theme';
-import { NavigationArrow, Setting } from '../../assets/svgs/icons';
+import { NavigationArrow, SettingIcon } from '../../assets/svgs/icons';
 import React from 'react';
 
 interface ButtonProps {
   buttonType: 'action' | 'full' | 'setting' | 'floating';
   children: string;
   onClick: () => void;
+  customStyle?: StyleProp<ViewStyle>;
 }
 
-const Button: React.FC<ButtonProps> = ({ buttonType, children, onClick }: ButtonProps) => {
+const Button: React.FC<ButtonProps> = ({
+  buttonType,
+  children,
+  onClick,
+  customStyle,
+}: ButtonProps) => {
   return (
     <TouchableOpacity
-      style={
+      style={[
         buttonType === 'action'
           ? style.actionButtonStyle
           : buttonType === 'setting'
             ? style.settingButtonStyle
             : buttonType === 'full'
               ? style.fullButtonStyle
-              : style.floatingButtonStyle
-      }
+              : style.floatingButtonStyle,
+        customStyle,
+      ]}
       onPress={onClick}
     >
-      {(buttonType === 'setting' && <Setting />) ||
+      {(buttonType === 'setting' && <SettingIcon />) ||
         (buttonType === 'floating' && <NavigationArrow />)}
       <Text
         style={
@@ -75,12 +82,12 @@ const style = StyleSheet.create({
   },
   fullButtonStyle: {
     paddingVertical: 17,
-    borderRadius: 5,
+    borderRadius: 7,
     backgroundColor: theme.color.main,
     alignItems: 'center',
   },
   fullButtonTextStyle: {
-    fontSize: 20,
+    fontSize: 18,
     color: theme.color.white,
   },
   floatingButtonStyle: {
@@ -105,8 +112,8 @@ const style = StyleSheet.create({
     fontWeight: 700,
   },
   floatingButtonIconStyle: {
-    width: 23,
-    height: 27,
+    width: 20,
+    height: 23,
     color: theme.color.white,
   },
 });
