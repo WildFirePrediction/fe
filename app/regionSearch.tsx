@@ -22,7 +22,7 @@ const RegionSearch = () => {
   };
 
   const handlePressItem = (item: string) => {
-    // POST api 호출
+    // TODO: POST api 호출 로직 구현
     router.back();
   };
 
@@ -42,8 +42,8 @@ const RegionSearch = () => {
           </TouchableOpacity>
         </View>
         <View style={style.searchResultContainer}>
-          {regionSearchData.map(region => (
-            <TouchableOpacity key={region} onPress={() => handlePressItem(region)}>
+          {regionSearchData.map((region, index) => (
+            <TouchableOpacity key={`${region}-${index}`} onPress={() => handlePressItem(region)}>
               <Text style={style.searchResultItem}>{region}</Text>
             </TouchableOpacity>
           ))}
