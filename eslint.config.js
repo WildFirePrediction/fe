@@ -64,6 +64,7 @@ module.exports = defineConfig([
       'react-native/no-raw-text': 'off',
       'react-native/no-unused-styles': 'off',
       'react-native/sort-styles': 'off',
+      'react/display-name': 'off',
 
       'prettier/prettier': [
         'error',
