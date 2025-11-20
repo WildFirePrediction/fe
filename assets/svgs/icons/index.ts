@@ -7,6 +7,7 @@ import RegionItemDelete from './RegionItemDelete.svg';
 import SortArrowDown from './SortArrowDown.svg';
 import People from './People.svg';
 import LocationPin from './LocationPin.svg';
+import Warning from './Warning.svg';
 
 export { NavigationArrow };
 export { Setting as SettingIcon };
@@ -17,3 +18,4 @@ export { RegionItemDelete as RegionItemDeleteIcon };
 export { SortArrowDown as SortArrowDownIcon };
 export { People as PeopleIcon };
 export { LocationPin as LocationPinIcon };
+export { Warning as WarningIcon };

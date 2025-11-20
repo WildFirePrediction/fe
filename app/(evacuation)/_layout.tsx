@@ -11,7 +11,7 @@ const RootLayout = () => {
       />
       <Stack.Screen name="shelters" options={{ headerShown: false }} />
       <Stack.Screen name="routePreview/[slug]" options={{ headerShown: false }} />
-      <Stack.Screen name="evacuationRoutePreview" options={{ headerShown: false }} />
+      <Stack.Screen name="route/[slug]" options={{ headerShown: false }} />
     </Stack>
   );
 };
