@@ -28,7 +28,9 @@ const EvacuationRoutePreview = () => {
     router.back();
   };
 
-  const handleEvacuation = () => {};
+  const handleEvacuation = () => {
+    router.replace(`/(evacuation)/route/${id}`);
+  };
 
   useEffect(() => {
     const lat1 = myLocation.latitude;
@@ -41,10 +43,9 @@ const EvacuationRoutePreview = () => {
     const y = Math.sin(lon2 - lon1) * Math.cos(lat2);
     const x =
       Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
-    let bearing = Math.atan2(y, x); // 라디안
-    bearing = (bearing * 180) / Math.PI; // 도(deg)
-    bearing = (bearing + 360) % 360; // 0~360 범위로 변환
-    console.log(bearing);
+    let bearing = Math.atan2(y, x);
+    bearing = (bearing * 180) / Math.PI;
+    bearing = (bearing + 360) % 360;
     setMyLocation(prev => ({ ...prev, bearing: bearing }));
   }, [myLocation.latitude, myLocation.longitude]);
 
@@ -111,13 +112,13 @@ const style = StyleSheet.create({
     position: 'absolute',
     marginStart: 20,
     marginTop: 20,
-    color: theme.color.darkGray2,
+    color: theme.color.black,
   },
   buttonContainer: {
     position: 'absolute',
     flexDirection: 'column',
-    gap: 25,
-    bottom: 10,
+    gap: 15,
+    bottom: 20,
     start: 20,
     end: 20,
   },
