@@ -9,10 +9,12 @@ import { PeopleIcon, SortArrowDownIcon } from '../../assets/svgs/icons';
 import theme from '../../styles/theme';
 import { Button } from '../../components';
 import { shelterData } from '../../mock/shelterData';
+import { useRouter } from 'expo-router';
 
 const sortOptions = ['거리순', '수용인원순'];
 
 const Shelters = () => {
+  const router = useRouter();
   const [sortType, setSortType] = useState('거리순');
   const [camera, setCamera] = useState<Camera>();
   const [sortModalOpen, setSortModalOpen] = useState(false);
@@ -25,6 +27,7 @@ const Shelters = () => {
 
   const handleEvacuationRoute = () => {
     // TODO: 경로 안내 화면으로 이동
+    router.push(`/(evacuation)/routePreview/1`);
   };
 
   const handleShelterInfo = () => {

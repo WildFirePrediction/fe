@@ -5,6 +5,7 @@ import React from 'react';
 
 interface ButtonProps {
   buttonType: 'action' | 'full' | 'setting' | 'floating';
+  colorStyle?: 'main' | 'white';
   children: string;
   onClick: () => void;
   customStyle?: StyleProp<ViewStyle>;
@@ -12,6 +13,7 @@ interface ButtonProps {
 
 const Button: React.FC<ButtonProps> = ({
   buttonType,
+  colorStyle = 'main',
   children,
   onClick,
   customStyle,
@@ -23,9 +25,11 @@ const Button: React.FC<ButtonProps> = ({
           ? style.actionButtonStyle
           : buttonType === 'setting'
             ? style.settingButtonStyle
-            : buttonType === 'full'
-              ? style.fullButtonStyle
-              : style.floatingButtonStyle,
+            : buttonType === 'floating'
+              ? style.floatingButtonStyle
+              : colorStyle === 'main'
+                ? style.fullButtonStyle
+                : [style.fullButtonStyle, style.fullButtonWhiteStyle],
         customStyle,
       ]}
       onPress={onClick}
@@ -38,9 +42,11 @@ const Button: React.FC<ButtonProps> = ({
             ? style.actionButtonTextStyle
             : buttonType === 'setting'
               ? style.settingButtonTextStyle
-              : buttonType === 'full'
-                ? style.fullButtonTextStyle
-                : style.floatingButtonTextStyle
+              : buttonType === 'floating'
+                ? style.floatingButtonTextStyle
+                : colorStyle === 'main'
+                  ? style.fullButtonTextStyle
+                  : [style.fullButtonTextStyle, style.fullButtonWhiteTextStyle]
         }
       >
         {children}
@@ -89,6 +95,14 @@ const style = StyleSheet.create({
   fullButtonTextStyle: {
     fontSize: 18,
     color: theme.color.white,
+  },
+  fullButtonWhiteStyle: {
+    backgroundColor: theme.color.white,
+    borderWidth: 1,
+    borderColor: theme.color.gray,
+  },
+  fullButtonWhiteTextStyle: {
+    color: theme.color.black,
   },
   floatingButtonStyle: {
     paddingVertical: 16,

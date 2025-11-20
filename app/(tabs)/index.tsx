@@ -33,7 +33,7 @@ const WildFireMapScreen = () => {
   const handleSelectRegion = (regionName: string) => {
     const region = myRegionData.find(myRegion => myRegion.name === regionName);
     setSelectedRegion(region);
-    setCamera(region ? { ...region, zoom: 12 } : region);
+    setCamera(region ? { ...region, zoom: 13.5 } : region);
   };
 
   const handleSetRegion = () => {
@@ -51,7 +51,7 @@ const WildFireMapScreen = () => {
       mapRef.current?.animateCameraTo({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
-        zoom: 12,
+        zoom: 13.5,
       });
     } catch (error) {
       console.error('Cannot get location information:', error);

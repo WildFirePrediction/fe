@@ -6,6 +6,7 @@ import Cancel from './Cancel.svg';
 import RegionItemDelete from './RegionItemDelete.svg';
 import SortArrowDown from './SortArrowDown.svg';
 import People from './People.svg';
+import LocationPin from './LocationPin.svg';
 
 export { NavigationArrow };
 export { Setting as SettingIcon };
@@ -15,3 +16,4 @@ export { Cancel as CancelIcon };
 export { RegionItemDelete as RegionItemDeleteIcon };
 export { SortArrowDown as SortArrowDownIcon };
 export { People as PeopleIcon };
+export { LocationPin as LocationPinIcon };
