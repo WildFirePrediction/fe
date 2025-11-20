@@ -5,16 +5,17 @@ import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'reac
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { PeopleIcon, SortArrowDownIcon } from '../../assets/svgs/icons';
+import { CancelIcon, PeopleIcon, SortArrowDownIcon } from '../../assets/svgs/icons';
 import theme from '../../styles/theme';
 import { Button } from '../../components';
 import { shelterData } from '../../mock/shelterData';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 const sortOptions = ['거리순', '수용인원순'];
 
 const Shelters = () => {
   const router = useRouter();
+  const id = useLocalSearchParams();
   const [sortType, setSortType] = useState('거리순');
   const [camera, setCamera] = useState<Camera>();
   const [sortModalOpen, setSortModalOpen] = useState(false);
@@ -26,8 +27,7 @@ const Shelters = () => {
   };
 
   const handleEvacuationRoute = () => {
-    // TODO: 경로 안내 화면으로 이동
-    router.push(`/(evacuation)/routePreview/1`);
+    router.push(`/(evacuation)/routePreview/${id}`);
   };
 
   const handleShelterInfo = () => {
@@ -42,90 +42,96 @@ const Shelters = () => {
 
   return (
     <GestureHandlerRootView>
-      <SafeAreaView style={style.container}>
-        <NaverMapView style={{ flex: 1 }} isShowLocationButton={false} camera={camera}>
-          {shelterData.map((shelter, index) => (
-            <NaverMapMarkerOverlay
-              key={`${shelter.name}-${index}`}
-              latitude={shelter.latitude}
-              longitude={shelter.longitude}
-              caption={{ text: shelter.name, requestedWidth: 30 }}
-              onTap={handleEvacuationRoute}
-            />
-          ))}
-        </NaverMapView>
-        <Modal visible={sortModalOpen} transparent={true} animationType="fade">
-          <Pressable style={style.modalBackground} onPress={() => setSortModalOpen(false)}>
-            <View style={style.modalContainer}>
-              <Text style={style.modalTitle}>정렬 기준</Text>
-              <View style={style.modalSortOptionsContainer}>
-                {sortOptions.map(option => (
-                  <Pressable
-                    style={style.modalSortOptionItem}
-                    onPress={() => handleSetSortOption(option)}
-                  >
-                    <Text
-                      style={
-                        option === sortType
-                          ? style.modalSortOptionSelectedText
-                          : style.modalSortOptionText
-                      }
+      <SafeAreaView style={style.screen}>
+        <View style={style.container}>
+          <NaverMapView style={{ flex: 1 }} isShowLocationButton={false} camera={camera}>
+            {shelterData.map((shelter, index) => (
+              <NaverMapMarkerOverlay
+                key={`${shelter.name}-${index}`}
+                latitude={shelter.latitude}
+                longitude={shelter.longitude}
+                caption={{ text: shelter.name, requestedWidth: 30 }}
+                onTap={handleEvacuationRoute}
+              />
+            ))}
+          </NaverMapView>
+          <CancelIcon style={style.closeIcon} onPress={() => router.back()} />
+
+          <Modal visible={sortModalOpen} transparent={true} animationType="fade">
+            <Pressable style={style.modalBackground} onPress={() => setSortModalOpen(false)}>
+              <View style={style.modalContainer}>
+                <Text style={style.modalTitle}>정렬 기준</Text>
+                <View style={style.modalSortOptionsContainer}>
+                  {sortOptions.map(option => (
+                    <Pressable
+                      style={style.modalSortOptionItem}
+                      onPress={() => handleSetSortOption(option)}
                     >
-                      {option}
-                    </Text>
+                      <Text
+                        style={
+                          option === sortType
+                            ? style.modalSortOptionSelectedText
+                            : style.modalSortOptionText
+                        }
+                      >
+                        {option}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+                <TouchableOpacity onPress={() => setSortModalOpen(false)}>
+                  <Text style={style.modalCancelText}>취소</Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </Modal>
+          <BottomSheet
+            style={style.bottomSheet}
+            snapPoints={[70, '50%']}
+            index={1}
+            overDragResistanceFactor={10}
+            maxDynamicContentSize={700}
+            animatedPosition={bottomSheetPosition}
+          >
+            <BottomSheetScrollView style={style.bottomSheetView}>
+              <Pressable style={style.sortContainer} onPress={() => setSortModalOpen(true)}>
+                <Text style={style.sortText}>{sortType}</Text>
+                <SortArrowDownIcon style={style.sortArrowIconStyle} />
+              </Pressable>
+              <View style={style.bottomSheetListContainer}>
+                {shelterData.map((shelter, index) => (
+                  <Pressable
+                    key={`${shelter.name}-${index}`}
+                    style={style.listItemContainer}
+                    onPress={handleEvacuationRoute}
+                  >
+                    {index === 0 && sortType === '거리순' && (
+                      <Text style={style.listItemHighlightText}>가장 가까운 대피소</Text>
+                    )}
+                    <View style={style.listItemDetailContainer}>
+                      <View style={style.listItemTitleContainer}>
+                        <Text style={style.listItemNameText} lineBreakStrategyIOS="hangul-word">
+                          {shelter.name}
+                        </Text>
+                        <Text style={style.listItemAdressText}>{shelter.address}</Text>
+                      </View>
+                      <Text style={style.listItemTimeText}>{shelter.time}</Text>
+                    </View>
+                    <View style={style.listItemDetailContainer}>
+                      <View style={style.listItemPeopleContainer}>
+                        <PeopleIcon />
+                        <Text style={style.listItemPeopleText}>{shelter.people}명</Text>
+                      </View>
+                      <Button buttonType="action" onClick={handleShelterInfo}>
+                        대피소 정보
+                      </Button>
+                    </View>
                   </Pressable>
                 ))}
               </View>
-              <TouchableOpacity onPress={() => setSortModalOpen(false)}>
-                <Text style={style.modalCancelText}>취소</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </Modal>
-        <BottomSheet
-          style={style.bottomSheet}
-          snapPoints={[70, '50%']}
-          index={1}
-          overDragResistanceFactor={10}
-          maxDynamicContentSize={700}
-          animatedPosition={bottomSheetPosition}
-        >
-          <BottomSheetScrollView style={style.bottomSheetView}>
-            <Pressable style={style.sortContainer} onPress={() => setSortModalOpen(true)}>
-              <Text style={style.sortText}>{sortType}</Text>
-              <SortArrowDownIcon style={style.sortArrowIconStyle} />
-            </Pressable>
-            <View style={style.bottomSheetListContainer}>
-              {shelterData.map((shelter, index) => (
-                <Pressable
-                  key={`${shelter.name}-${index}`}
-                  style={style.listItemContainer}
-                  onPress={handleEvacuationRoute}
-                >
-                  {index === 0 && sortType === '거리순' && (
-                    <Text style={style.listItemHighlightText}>가장 가까운 대피소</Text>
-                  )}
-                  <View style={style.listItemDetailContainer}>
-                    <View style={style.listItemTitleContainer}>
-                      <Text style={style.listItemNameText}>{shelter.name}</Text>
-                      <Text style={style.listItemAdressText}>{shelter.address}</Text>
-                    </View>
-                    <Text style={style.listItemTimeText}>{shelter.time}</Text>
-                  </View>
-                  <View style={style.listItemDetailContainer}>
-                    <View style={style.listItemPeopleContainer}>
-                      <PeopleIcon />
-                      <Text style={style.listItemPeopleText}>{shelter.people}명</Text>
-                    </View>
-                    <Button buttonType="action" onClick={handleShelterInfo}>
-                      대피소 정보
-                    </Button>
-                  </View>
-                </Pressable>
-              ))}
-            </View>
-          </BottomSheetScrollView>
-        </BottomSheet>
+            </BottomSheetScrollView>
+          </BottomSheet>
+        </View>
       </SafeAreaView>
     </GestureHandlerRootView>
   );
@@ -133,9 +139,17 @@ const Shelters = () => {
 export default Shelters;
 
 const style = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    height: '100%',
+  },
+  closeIcon: {
+    position: 'absolute',
+    marginStart: 20,
+    marginTop: 20,
+    color: theme.color.black,
   },
   bottomSheet: {
     flex: 1,
@@ -162,9 +176,9 @@ const style = StyleSheet.create({
     marginTop: 13,
   },
   listItemContainer: {
-    gap: 5,
+    gap: 7,
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 14,
     borderBottomWidth: 1,
     borderColor: theme.color.gray,
   },
@@ -177,6 +191,7 @@ const style = StyleSheet.create({
   },
   listItemNameText: {
     fontSize: 17,
+    width: 300,
   },
   listItemAdressText: {
     fontSize: 15,
@@ -210,23 +225,24 @@ const style = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: theme.color.white,
     borderRadius: 10,
+    borderColor: theme.color.gray,
+    borderWidth: 1,
     padding: 30,
-    paddingBottom: 20,
+    paddingBottom: 25,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
   },
   modalSortOptionsContainer: {
-    marginTop: 17,
+    marginTop: 10,
     flexDirection: 'column',
   },
   modalSortOptionItem: {
-    paddingVertical: 7,
+    paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: theme.color.gray,
   },
-
   modalSortOptionText: {
     fontSize: 17,
     color: theme.color.black,
@@ -236,8 +252,8 @@ const style = StyleSheet.create({
     color: theme.color.main,
   },
   modalCancelText: {
-    marginTop: 20,
-    fontSize: 15,
+    marginTop: 30,
+    fontSize: 17,
     color: theme.color.darkGray1,
     alignSelf: 'flex-end',
   },
