@@ -41,7 +41,7 @@ const WildFireMapScreen = () => {
   };
 
   const handleNavigateToEvacuation = () => {
-    /* TODO: 대피안내 페이지로 navigate */
+    router.push('/(evacuation)/shelters');
   };
 
   const moveToCurrentLocation = async () => {
