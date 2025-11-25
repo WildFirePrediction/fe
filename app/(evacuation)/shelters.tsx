@@ -1,25 +1,36 @@
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { Camera, NaverMapMarkerOverlay, NaverMapView } from '@mj-studio/react-native-naver-map';
-import { useEffect, useState } from 'react';
+import {
+  Camera,
+  NaverMapMarkerOverlay,
+  NaverMapView,
+  NaverMapViewRef,
+} from '@mj-studio/react-native-naver-map';
+import { useEffect, useRef, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useSharedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CancelIcon, PeopleIcon, SortArrowDownIcon } from '../../assets/svgs/icons';
 import theme from '../../styles/theme';
-import { Button } from '../../components';
+import { Button, MapButton } from '../../components';
 import { shelterData } from '../../mock/shelterData';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as Location from 'expo-location';
 
 const sortOptions = ['거리순', '수용인원순'];
 
 const Shelters = () => {
   const router = useRouter();
   const id = useLocalSearchParams();
+  const mapRef = useRef<NaverMapViewRef>(null);
   const [sortType, setSortType] = useState('거리순');
   const [camera, setCamera] = useState<Camera>();
   const [sortModalOpen, setSortModalOpen] = useState(false);
   const bottomSheetPosition = useSharedValue<number>(0);
+
+  const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
+    top: bottomSheetPosition.value - 80,
+  }));
 
   const handleSetSortOption = (option: string) => {
     setSortType(option);
@@ -34,23 +45,48 @@ const Shelters = () => {
     // TODO: 대피소 정보 화면으로 이동
   };
 
+  const moveToCurrentLocation = async () => {
+    try {
+      const position = await Location.getCurrentPositionAsync();
+
+      mapRef.current?.animateCameraTo({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        zoom: 14,
+      });
+    } catch (error) {
+      console.error('Cannot get location information:', error);
+    }
+  };
+
   useEffect(() => {
     if (shelterData.length > 0) {
       setCamera({ ...shelterData[0], zoom: 15 });
     }
+    mapRef.current?.setLocationTrackingMode('NoFollow');
   }, []);
 
   return (
     <GestureHandlerRootView>
       <SafeAreaView style={style.screen}>
         <View style={style.container}>
-          <NaverMapView style={{ flex: 1 }} isShowLocationButton={false} camera={camera}>
+          <NaverMapView
+            ref={mapRef}
+            style={{ flex: 1 }}
+            isShowLocationButton={true}
+            camera={camera}
+            isShowCompass={false}
+          >
             {shelterData.map((shelter, index) => (
               <NaverMapMarkerOverlay
                 key={`${shelter.name}-${index}`}
                 latitude={shelter.latitude}
                 longitude={shelter.longitude}
-                caption={{ text: shelter.name, requestedWidth: 30 }}
+                caption={{
+                  text: shelter.name,
+                  requestedWidth: 40,
+                }}
+                image={require('../../assets/pngs/shelterMarker.png')}
                 onTap={handleEvacuationRoute}
               />
             ))}
@@ -64,6 +100,7 @@ const Shelters = () => {
                 <View style={style.modalSortOptionsContainer}>
                   {sortOptions.map(option => (
                     <Pressable
+                      key={option}
                       style={style.modalSortOptionItem}
                       onPress={() => handleSetSortOption(option)}
                     >
@@ -85,9 +122,12 @@ const Shelters = () => {
               </View>
             </Pressable>
           </Modal>
+          <Animated.View style={[style.floatingButtonsContainer, floatingButtonsAnimatedStyle]}>
+            <MapButton onClick={moveToCurrentLocation} />
+          </Animated.View>
           <BottomSheet
             style={style.bottomSheet}
-            snapPoints={[70, '50%']}
+            snapPoints={[70, '40%']}
             index={1}
             overDragResistanceFactor={10}
             maxDynamicContentSize={700}
@@ -102,7 +142,11 @@ const Shelters = () => {
                 {shelterData.map((shelter, index) => (
                   <Pressable
                     key={`${shelter.name}-${index}`}
-                    style={style.listItemContainer}
+                    style={
+                      index === 0 && sortType === '거리순'
+                        ? [style.listItemContainer, style.listItemHightlightContainer]
+                        : style.listItemContainer
+                    }
                     onPress={handleEvacuationRoute}
                   >
                     {index === 0 && sortType === '거리순' && (
@@ -119,10 +163,10 @@ const Shelters = () => {
                     </View>
                     <View style={style.listItemDetailContainer}>
                       <View style={style.listItemPeopleContainer}>
-                        <PeopleIcon />
+                        <PeopleIcon style={style.listItemPeopleIcon} />
                         <Text style={style.listItemPeopleText}>{shelter.people}명</Text>
                       </View>
-                      <Button buttonType="action" onClick={handleShelterInfo}>
+                      <Button buttonType="action" colorStyle="white" onClick={handleShelterInfo}>
                         대피소 정보
                       </Button>
                     </View>
@@ -199,6 +243,7 @@ const style = StyleSheet.create({
   },
   listItemTimeText: {
     fontSize: 17,
+    color: theme.color.rain,
   },
   listItemPeopleContainer: {
     flexDirection: 'row',
@@ -207,7 +252,14 @@ const style = StyleSheet.create({
   },
   listItemPeopleText: {
     fontSize: 13,
-    color: theme.color.point,
+    color: theme.color.darkGray2,
+  },
+  listItemPeopleIcon: {
+    width: 18.5,
+    color: theme.color.darkGray2,
+  },
+  listItemHightlightContainer: {
+    backgroundColor: theme.color.lightGray1,
   },
   listItemHighlightText: {
     fontSize: 13,
@@ -256,5 +308,12 @@ const style = StyleSheet.create({
     fontSize: 17,
     color: theme.color.darkGray1,
     alignSelf: 'flex-end',
+  },
+  floatingButtonsContainer: {
+    position: 'absolute',
+    right: 10,
+    alignSelf: 'flex-end',
+    alignItems: 'flex-end',
+    gap: 20,
   },
 });
