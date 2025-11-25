@@ -76,7 +76,13 @@ const WildFireMapScreen = () => {
   return (
     <GestureHandlerRootView>
       <SafeAreaView style={style.container}>
-        <NaverMapView ref={mapRef} style={{ flex: 1 }} camera={camera} isShowLocationButton={false}>
+        <NaverMapView
+          ref={mapRef}
+          style={{ flex: 1 }}
+          camera={camera}
+          isShowLocationButton={false}
+          locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
+        >
           <NaverMapPolygonOverlay
             coords={coordsFire}
             color={theme.color.mainTransparent}

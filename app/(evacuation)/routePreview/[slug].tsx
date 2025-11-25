@@ -43,7 +43,6 @@ const EvacuationRoutePreview = () => {
       longitude: position.coords.longitude,
       zoom: 15,
     });
-    console.log({ latitude: position.coords.latitude, longitude: position.coords.longitude });
   };
 
   useEffect(() => {
@@ -78,6 +77,7 @@ const EvacuationRoutePreview = () => {
             camera={myLocation}
             isShowCompass={false}
             isShowLocationButton={false}
+            locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
           >
             <NaverMapPolygonOverlay
               coords={coordsFire}

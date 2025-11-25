@@ -76,6 +76,7 @@ const Shelters = () => {
             isShowLocationButton={false}
             camera={camera}
             isShowCompass={false}
+            locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
           >
             {shelterData.map((shelter, index) => (
               <NaverMapMarkerOverlay
