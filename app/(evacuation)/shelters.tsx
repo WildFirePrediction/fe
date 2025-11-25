@@ -73,7 +73,7 @@ const Shelters = () => {
           <NaverMapView
             ref={mapRef}
             style={{ flex: 1 }}
-            isShowLocationButton={true}
+            isShowLocationButton={false}
             camera={camera}
             isShowCompass={false}
           >

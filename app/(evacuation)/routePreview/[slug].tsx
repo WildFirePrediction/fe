@@ -77,7 +77,7 @@ const EvacuationRoutePreview = () => {
             style={style.naverMap}
             camera={myLocation}
             isShowCompass={false}
-            isShowLocationButton={true}
+            isShowLocationButton={false}
           >
             <NaverMapPolygonOverlay
               coords={coordsFire}

@@ -64,6 +64,8 @@ const WildFireMapScreen = () => {
         const { granted } = await Location.requestForegroundPermissionsAsync();
         if (granted) {
           await Location.requestBackgroundPermissionsAsync();
+          mapRef.current?.setLocationTrackingMode('NoFollow');
+          setCamera(selectedRegion ? { ...selectedRegion, zoom: 13.5 } : selectedRegion);
         }
       } catch (e) {
         console.error(`Location request has been failed: ${e}`);
