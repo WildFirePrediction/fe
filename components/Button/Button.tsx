@@ -22,7 +22,9 @@ const Button: React.FC<ButtonProps> = ({
     <TouchableOpacity
       style={[
         buttonType === 'action'
-          ? style.actionButtonStyle
+          ? colorStyle === 'main'
+            ? style.actionButtonStyle
+            : [style.actionButtonStyle, style.actionButtonWhiteStyle]
           : buttonType === 'setting'
             ? style.settingButtonStyle
             : buttonType === 'floating'
@@ -39,7 +41,9 @@ const Button: React.FC<ButtonProps> = ({
       <Text
         style={
           buttonType === 'action'
-            ? style.actionButtonTextStyle
+            ? colorStyle === 'main'
+              ? style.actionButtonTextStyle
+              : [style.actionButtonTextStyle, style.actionButtonWhiteTextStyle]
             : buttonType === 'setting'
               ? style.settingButtonTextStyle
               : buttonType === 'floating'
@@ -76,24 +80,32 @@ const style = StyleSheet.create({
     color: theme.color.darkGray1,
   },
   actionButtonStyle: {
-    paddingVertical: 8,
-    paddingHorizontal: 17,
+    paddingVertical: 7,
+    paddingHorizontal: 14,
     borderRadius: 10,
     backgroundColor: theme.color.main,
     alignSelf: 'flex-start',
   },
   actionButtonTextStyle: {
-    fontSize: 16,
+    fontSize: 12,
     color: theme.color.white,
+  },
+  actionButtonWhiteStyle: {
+    backgroundColor: theme.color.white,
+    borderWidth: 1,
+    borderColor: theme.color.gray,
+  },
+  actionButtonWhiteTextStyle: {
+    color: theme.color.black,
   },
   fullButtonStyle: {
     paddingVertical: 17,
-    borderRadius: 7,
+    borderRadius: 15,
     backgroundColor: theme.color.main,
     alignItems: 'center',
   },
   fullButtonTextStyle: {
-    fontSize: 18,
+    fontSize: 16,
     color: theme.color.white,
   },
   fullButtonWhiteStyle: {
