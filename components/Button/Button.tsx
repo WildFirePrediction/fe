@@ -18,43 +18,44 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   customStyle,
 }: ButtonProps) => {
+  const getButtonStyle = () => {
+    const baseStyles = {
+      action:
+        colorStyle === 'main'
+          ? [style.actionButtonStyle]
+          : [style.actionButtonStyle, style.actionButtonWhiteStyle],
+      setting: [style.settingButtonStyle],
+      floating: [style.floatingButtonStyle],
+      full:
+        colorStyle === 'main'
+          ? [style.fullButtonStyle]
+          : [style.fullButtonStyle, style.fullButtonWhiteStyle],
+    };
+
+    return baseStyles[buttonType];
+  };
+  const getButtonTextStyle = () => {
+    const baseStyles = {
+      action:
+        colorStyle === 'main'
+          ? [style.actionButtonTextStyle]
+          : [style.actionButtonTextStyle, style.actionButtonWhiteTextStyle],
+      setting: [style.settingButtonTextStyle],
+      floating: [style.floatingButtonTextStyle],
+      full:
+        colorStyle === 'main'
+          ? [style.fullButtonTextStyle]
+          : [style.fullButtonTextStyle, style.fullButtonWhiteTextStyle],
+    };
+
+    return baseStyles[buttonType];
+  };
+
   return (
-    <TouchableOpacity
-      style={[
-        buttonType === 'action'
-          ? colorStyle === 'main'
-            ? style.actionButtonStyle
-            : [style.actionButtonStyle, style.actionButtonWhiteStyle]
-          : buttonType === 'setting'
-            ? style.settingButtonStyle
-            : buttonType === 'floating'
-              ? style.floatingButtonStyle
-              : colorStyle === 'main'
-                ? style.fullButtonStyle
-                : [style.fullButtonStyle, style.fullButtonWhiteStyle],
-        customStyle,
-      ]}
-      onPress={onClick}
-    >
+    <TouchableOpacity style={[getButtonStyle(), customStyle]} onPress={onClick}>
       {(buttonType === 'setting' && <SettingIcon />) ||
         (buttonType === 'floating' && <NavigationArrow />)}
-      <Text
-        style={
-          buttonType === 'action'
-            ? colorStyle === 'main'
-              ? style.actionButtonTextStyle
-              : [style.actionButtonTextStyle, style.actionButtonWhiteTextStyle]
-            : buttonType === 'setting'
-              ? style.settingButtonTextStyle
-              : buttonType === 'floating'
-                ? style.floatingButtonTextStyle
-                : colorStyle === 'main'
-                  ? style.fullButtonTextStyle
-                  : [style.fullButtonTextStyle, style.fullButtonWhiteTextStyle]
-        }
-      >
-        {children}
-      </Text>
+      <Text style={getButtonTextStyle()}>{children}</Text>
     </TouchableOpacity>
   );
 };
