@@ -23,9 +23,10 @@ const EvacuationRoutePreview = () => {
   const mapRef = useRef<NaverMapViewRef>(null);
 
   const [myLocation, setMyLocation] = useState({
-    latitude: 40,
+    latitude: 37.505278,
     longitude: 126.954613,
     zoom: 15,
+    bearing: 0,
   });
 
   const handleGoBack = () => {
@@ -38,16 +39,9 @@ const EvacuationRoutePreview = () => {
 
   const setCurrentPosition = async () => {
     const position = await Location.getCurrentPositionAsync();
-    setMyLocation({
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-      zoom: 15,
-    });
-  };
 
-  useEffect(() => {
-    const lat1 = myLocation.latitude;
-    const lon1 = myLocation.longitude;
+    const lat1 = position.coords.latitude;
+    const lon1 = position.coords.longitude;
 
     const last = evacuationRouteData.at(-1) ?? { latitude: lat1, longitude: lon1 };
     const lat2 = last.latitude;
@@ -59,8 +53,13 @@ const EvacuationRoutePreview = () => {
     let bearing = Math.atan2(y, x);
     bearing = (bearing * 180) / Math.PI;
     bearing = (bearing + 360) % 360;
-    setMyLocation(prev => ({ ...prev, bearing: bearing }));
-  }, [myLocation.latitude, myLocation.longitude]);
+    setMyLocation({
+      latitude: lat1,
+      longitude: lon1,
+      zoom: 15,
+      bearing: bearing,
+    });
+  };
 
   useEffect(() => {
     mapRef.current?.setLocationTrackingMode('NoFollow');
