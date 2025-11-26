@@ -9,9 +9,9 @@ const RootLayout = () => {
           headerShown: false,
         }}
       />
-      <Stack.Screen name="regionSetting" options={{ headerShown: false }} />
-      <Stack.Screen name="regionSearch" options={{ headerShown: false }} />
-      <Stack.Screen name="(evacuation)" options={{ headerShown: false }} />
+      <Stack.Screen name="shelters" options={{ headerShown: false }} />
+      <Stack.Screen name="routePreview/[slug]" options={{ headerShown: false }} />
+      <Stack.Screen name="route/[slug]" options={{ headerShown: false }} />
     </Stack>
   );
 };

@@ -65,6 +65,9 @@ module.exports = defineConfig([
       'react-native/no-unused-styles': 'off',
       'react-native/sort-styles': 'off',
       'react/display-name': 'off',
+      'react-hooks/set-state-in-effect': 'warn',
+      '@typescript-eslint/no-require-imports': 'off',
+      'eslint(react-hooks/set-state-in-effect': 'off',
 
       'prettier/prettier': [
         'error',

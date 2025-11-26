@@ -33,7 +33,7 @@ const WildFireMapScreen = () => {
   const handleSelectRegion = (regionName: string) => {
     const region = myRegionData.find(myRegion => myRegion.name === regionName);
     setSelectedRegion(region);
-    setCamera(region ? { ...region, zoom: 12 } : region);
+    setCamera(region ? { ...region, zoom: 13.5 } : region);
   };
 
   const handleSetRegion = () => {
@@ -41,7 +41,7 @@ const WildFireMapScreen = () => {
   };
 
   const handleNavigateToEvacuation = () => {
-    /* TODO: 대피안내 페이지로 navigate */
+    router.push('/(evacuation)/shelters');
   };
 
   const moveToCurrentLocation = async () => {
@@ -51,7 +51,7 @@ const WildFireMapScreen = () => {
       mapRef.current?.animateCameraTo({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
-        zoom: 12,
+        zoom: 13.5,
       });
     } catch (error) {
       console.error('Cannot get location information:', error);
@@ -64,6 +64,8 @@ const WildFireMapScreen = () => {
         const { granted } = await Location.requestForegroundPermissionsAsync();
         if (granted) {
           await Location.requestBackgroundPermissionsAsync();
+          mapRef.current?.setLocationTrackingMode('NoFollow');
+          setCamera(selectedRegion ? { ...selectedRegion, zoom: 13.5 } : selectedRegion);
         }
       } catch (e) {
         console.error(`Location request has been failed: ${e}`);
@@ -74,7 +76,13 @@ const WildFireMapScreen = () => {
   return (
     <GestureHandlerRootView>
       <SafeAreaView style={style.container}>
-        <NaverMapView ref={mapRef} style={{ flex: 1 }} camera={camera} isShowLocationButton={false}>
+        <NaverMapView
+          ref={mapRef}
+          style={{ flex: 1 }}
+          camera={camera}
+          isShowLocationButton={false}
+          locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
+        >
           <NaverMapPolygonOverlay
             coords={coordsFire}
             color={theme.color.mainTransparent}
