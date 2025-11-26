@@ -19,7 +19,7 @@ import * as Location from 'expo-location';
 
 const EvacuationRoutePreview = () => {
   const router = useRouter();
-  const id = useLocalSearchParams<{ slug: string }>();
+  const { slug } = useLocalSearchParams<{ slug: string }>();
   const mapRef = useRef<NaverMapViewRef>(null);
 
   const [myLocation, setMyLocation] = useState({
@@ -33,7 +33,7 @@ const EvacuationRoutePreview = () => {
   };
 
   const handleEvacuation = () => {
-    router.replace(`/(evacuation)/route/${id}`);
+    router.replace(`/(evacuation)/route/${slug}`);
   };
 
   const setCurrentPosition = async () => {

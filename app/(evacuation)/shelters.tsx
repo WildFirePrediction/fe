@@ -21,7 +21,7 @@ const sortOptions = ['거리순', '수용인원순'];
 
 const Shelters = () => {
   const router = useRouter();
-  const id = useLocalSearchParams();
+  const { slug } = useLocalSearchParams<{ slug: string }>();
   const mapRef = useRef<NaverMapViewRef>(null);
   const [sortType, setSortType] = useState('거리순');
   const [camera, setCamera] = useState<Camera>();
@@ -38,7 +38,7 @@ const Shelters = () => {
   };
 
   const handleEvacuationRoute = () => {
-    router.push(`/(evacuation)/routePreview/${id}`);
+    router.push(`/(evacuation)/routePreview/${slug}`);
   };
 
   const handleShelterInfo = () => {
