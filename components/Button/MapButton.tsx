@@ -1,14 +1,15 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import theme from '../../styles/theme';
 import { LocationIcon } from '../../assets/svgs/icons';
 
 interface MapButtonProps {
   onClick: () => void;
+  customStyle?: StyleProp<ViewStyle>;
 }
-const MapButton: React.FC<MapButtonProps> = ({ onClick }: MapButtonProps) => {
+const MapButton: React.FC<MapButtonProps> = ({ onClick, customStyle }: MapButtonProps) => {
   return (
-    <TouchableOpacity style={style.buttonStyle} onPress={onClick}>
+    <TouchableOpacity style={[style.buttonStyle, customStyle]} onPress={onClick}>
       <LocationIcon />
     </TouchableOpacity>
   );

@@ -14,6 +14,7 @@ import LandSlide from './Landslide.svg';
 import Flood from './Flood.svg';
 import Dust from './Dust.svg';
 import Snow from './Snow.svg';
+import BackArrow from './BackArrow.svg';
 
 export { NavigationArrow };
 export { Setting as SettingIcon };
@@ -31,3 +32,4 @@ export { LandSlide as LandSlideIcon };
 export { Flood as FloodIcon };
 export { Dust as DustIcon };
 export { Snow as SnowIcon };
+export { BackArrow as BackArrowIcon };

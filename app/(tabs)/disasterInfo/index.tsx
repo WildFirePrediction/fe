@@ -41,7 +41,7 @@ const DisasterInfoScreen = () => {
   };
 
   const handleShowMap = () => {
-    // TODO: 지도 화면으로 이동
+    router.push('/disasterInfoMap');
   };
 
   const handleRegionSetting = () => {

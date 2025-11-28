@@ -12,6 +12,7 @@ const RootLayout = () => {
       <Stack.Screen name="regionSetting" options={{ headerShown: false }} />
       <Stack.Screen name="regionSearch" options={{ headerShown: false }} />
       <Stack.Screen name="(evacuation)" options={{ headerShown: false }} />
+      <Stack.Screen name="disasterInfoMap" options={{ headerShown: false }} />
     </Stack>
   );
 };
