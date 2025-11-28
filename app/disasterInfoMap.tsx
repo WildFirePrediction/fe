@@ -40,7 +40,7 @@ const DisasterInfoMap = () => {
   };
 
   const handleDisasterDetail = () => {
-    router.push('/disasterInfo/1');
+    router.push('/disasterDetail/1');
   };
 
   useEffect(() => {

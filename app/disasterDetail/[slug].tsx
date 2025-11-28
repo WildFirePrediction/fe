@@ -1,10 +1,10 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import theme from '../../../styles/theme';
-import { CancelIcon } from '../../../assets/svgs/icons';
+import theme from '../../styles/theme';
+import { CancelIcon } from '../../assets/svgs/icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { disasterDetailInfoData } from '../../../mock/disasterDetailInfoData';
+import { disasterDetailInfoData } from '../../mock/disasterDetailInfoData';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { disasterColorMap } from '../../../constants/categories';
+import { disasterColorMap } from '../../constants/categories';
 
 const DisasterInfoDetail = () => {
   const router = useRouter();

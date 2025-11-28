@@ -49,7 +49,7 @@ const DisasterInfoScreen = () => {
   };
 
   const handleDisasterDetail = () => {
-    router.push('/disasterInfo/1');
+    router.push('/disasterDetail/1');
   };
 
   return (
@@ -153,7 +153,8 @@ const style = StyleSheet.create({
     marginTop: 10,
   },
   headerText: {
-    fontSize: 25,
+    fontSize: 23,
+    fontWeight: 'bold',
   },
   mapButton: {
     paddingHorizontal: 12,
@@ -172,11 +173,11 @@ const style = StyleSheet.create({
     height: 196,
   },
   columnWrapperStyle: {
-    marginBottom: 10,
+    marginBottom: 15,
   },
   categoryItem: {
-    width: 90,
-    height: 90,
+    width: 80,
+    height: 80,
     gap: 10,
     justifyContent: 'center',
     alignItems: 'center',
@@ -206,7 +207,6 @@ const style = StyleSheet.create({
     width: '100%',
     flexDirection: 'column',
     gap: 10,
-    marginTop: 20,
   },
   regionOptionContainer: {
     width: '100%',
