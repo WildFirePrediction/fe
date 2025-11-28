@@ -88,6 +88,7 @@ const DisasterInfoScreen = () => {
             )}
             numColumns={3}
             scrollEnabled={false}
+            keyExtractor={item => item}
           />
         </View>
         <View style={style.body}>
@@ -96,7 +97,7 @@ const DisasterInfoScreen = () => {
               <View style={style.regionSelectionContainer}>
                 {myRegionData.map((region, index) => (
                   <SelectionButton
-                    key={`${region}-${index}`}
+                    key={`${region.name}-${index}`}
                     selected={region.name === selectedRegion?.name}
                     onClick={() => setSelectedRegion(region)}
                   >

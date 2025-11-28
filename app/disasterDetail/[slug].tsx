@@ -23,8 +23,8 @@ const DisasterInfoDetail = () => {
       </View>
       <View style={style.informationConatiner}>
         {disasterDetailInfoData.map((info, index) => (
-          <View key={`${info}-${index}`} style={style.informationElement}>
-            <Text style={style.inoformationLabelText}>{info.label}</Text>
+          <View key={`${info.label}-${index}`} style={style.informationElement}>
+            <Text style={style.informationLabelText}>{info.label}</Text>
             <Text style={style.informationContentText}>{info.content}</Text>
           </View>
         ))}
@@ -81,7 +81,7 @@ const style = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
   },
-  inoformationLabelText: {
+  informationLabelText: {
     fontSize: 15,
     color: theme.color.darkGray2,
   },

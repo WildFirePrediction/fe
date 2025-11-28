@@ -27,8 +27,13 @@ const DisasterInfoMap = () => {
 
   const moveToCurrentLocation = async () => {
     try {
-      const position = await Location.getCurrentPositionAsync();
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Permission to access location was denied');
+        return;
+      }
 
+      const position = await Location.getCurrentPositionAsync();
       mapRef.current?.animateCameraTo({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
@@ -85,7 +90,7 @@ const DisasterInfoMap = () => {
                 <View style={style.regionSelectionListContainer}>
                   {myRegionData.map((region, index) => (
                     <SelectionButton
-                      key={`${region}-${index}`}
+                      key={`${region.name}-${index}`}
                       selected={region.name === selectedRegion?.name}
                       onClick={() => setSelectedRegion(region)}
                     >
@@ -96,9 +101,9 @@ const DisasterInfoMap = () => {
               </ScrollView>
             </View>
             <View style={style.categoryContainer}>
-              {disasterCategories.map((category, index) => (
+              {disasterCategories.map(category => (
                 <TouchableOpacity
-                  key={`${category}-${index}`}
+                  key={category}
                   style={
                     disasterMap[category] === selectedCategory
                       ? [style.categoryButton, style.selectedCategoryButton]

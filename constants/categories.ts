@@ -13,9 +13,7 @@ export const disasterMap: {
   황사: 'DUST',
 };
 
-export const disasterColorMap: {
-  [key: string]: string;
-} = {
+export const disasterColorMap: Record<Disaster, string> = {
   WILDFIRE: theme.color.fire,
   LANDSLIDE: theme.color.landSlide,
   FLOOD: theme.color.rain,
