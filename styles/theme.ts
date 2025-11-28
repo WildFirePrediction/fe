@@ -14,6 +14,8 @@ const theme = {
     rain: '#3F88F5',
     fire: '#F53F3F',
     landSlide: '#3AAD4C',
+    snow: '#62BFBA',
+    dust: '#FFA220',
     messageRain: '#0057D9',
     messageLandslide: '#D96900',
     black: '#000000',
