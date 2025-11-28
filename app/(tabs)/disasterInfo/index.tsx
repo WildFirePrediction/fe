@@ -14,7 +14,7 @@ import { Button, SelectionButton } from '../../../components';
 import { disasterInfoData } from '../../../mock/disasterInfoData';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { disasterCategories, disasterMap } from '../../../constants/categories';
+import { disastersKor, disasterMap } from '../../../constants/categories';
 import { Disaster } from '../../../types/disaster';
 import { SvgProps } from 'react-native-svg';
 
@@ -64,7 +64,7 @@ const DisasterInfoScreen = () => {
         </View>
         <View style={style.categoryContainer}>
           <FlatList
-            data={disasterCategories}
+            data={disastersKor}
             columnWrapperStyle={style.columnWrapperStyle}
             renderItem={({ item }) => (
               <TouchableOpacity
