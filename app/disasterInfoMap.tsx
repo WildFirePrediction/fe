@@ -25,6 +25,12 @@ const DisasterInfoMap = () => {
   const [selectedCategory, setSelectedCategory] = useState<Disaster>('WILDFIRE');
   const [selectedRegion, setSelectedRegion] = useState(myRegionData.at(0));
 
+  const handleSelectRegion = (regionName: string) => {
+    const region = myRegionData.find(myRegion => myRegion.name === regionName);
+    setSelectedRegion(region);
+    setCamera(region ? { ...region, zoom: 13.5 } : region);
+  };
+
   const moveToCurrentLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -92,7 +98,7 @@ const DisasterInfoMap = () => {
                     <SelectionButton
                       key={`${region.name}-${index}`}
                       selected={region.name === selectedRegion?.name}
-                      onClick={() => setSelectedRegion(region)}
+                      onClick={handleSelectRegion}
                     >
                       {region.name}
                     </SelectionButton>
