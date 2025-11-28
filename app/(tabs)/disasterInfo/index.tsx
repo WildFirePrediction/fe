@@ -49,7 +49,7 @@ const DisasterInfoScreen = () => {
   };
 
   const handleDisasterDetail = () => {
-    // TODO: 재난 상세 정보로 이동
+    router.push('/disasterInfo/1');
   };
 
   return (

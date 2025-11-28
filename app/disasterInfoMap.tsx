@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import theme from '../styles/theme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -39,6 +39,10 @@ const DisasterInfoMap = () => {
     }
   };
 
+  const handleDisasterDetail = () => {
+    router.push('/disasterInfo/1');
+  };
+
   useEffect(() => {
     if (floodMapData.length > 0) {
       setCamera({ ...floodMapData[0], zoom: 15 });
@@ -65,6 +69,7 @@ const DisasterInfoMap = () => {
                 longitude={item.longitude}
                 image={require('../assets/pngs/floodMarker.png')}
                 caption={{ text: item.date, align: 'Top' }}
+                onTap={() => handleDisasterDetail()}
               />
             ))}
           </NaverMapView>
