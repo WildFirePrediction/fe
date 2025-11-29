@@ -10,10 +10,10 @@ import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'reac
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CancelIcon, PeopleIcon, SortArrowDownIcon } from '../../assets/svgs/icons';
-import theme from '../../styles/theme';
-import { Button, MapButton } from '../../components';
-import { shelterData } from '../../mock/shelterData';
+import { CancelIcon, PeopleIcon, SortArrowDownIcon } from '../../../assets/svgs/icons';
+import theme from '../../../styles/theme';
+import { Button, MapButton } from '../../../components';
+import { shelterData } from '../../../mock/shelterData';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 
@@ -42,7 +42,7 @@ const Shelters = () => {
   };
 
   const handleShelterInfo = () => {
-    // TODO: 대피소 정보 화면으로 이동
+    router.push(`/(evacuation)/shelters/${slug}`);
   };
 
   const moveToCurrentLocation = async () => {
@@ -87,7 +87,7 @@ const Shelters = () => {
                   text: shelter.name,
                   requestedWidth: 40,
                 }}
-                image={require('../../assets/pngs/shelterMarker.png')}
+                image={require('../../../assets/pngs/shelterMarker.png')}
                 onTap={handleEvacuationRoute}
               />
             ))}
