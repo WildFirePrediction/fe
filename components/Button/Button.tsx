@@ -136,6 +136,7 @@ const style = StyleSheet.create({
       width: 4,
       height: 4,
     },
+    elevation: 5,
   },
   floatingButtonTextStyle: {
     fontSize: 16,

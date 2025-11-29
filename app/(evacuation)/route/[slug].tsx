@@ -151,6 +151,7 @@ const style = StyleSheet.create({
     shadowColor: theme.color.black,
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 4 },
+    elevation: 5,
     bottom: 30,
     start: 20,
     end: 20,

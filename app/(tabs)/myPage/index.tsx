@@ -71,10 +71,11 @@ const MyPageScreen = () => {
                 const selected = selectedCategories.includes(item);
                 return (
                   <TouchableOpacity
-                    style={{
-                      ...(selected ? style.selectedNotificationItem : style.notificationItem),
-                      width: (containerWidth - 20) / 2,
-                    }}
+                    style={[
+                      style.notificationItem,
+                      selected && style.selectedNotificationItem,
+                      { width: (containerWidth - 2) / 2 },
+                    ]}
                     activeOpacity={0.7}
                     onPress={() => handleToggleCategory(item)}
                   >
@@ -189,6 +190,7 @@ const style = StyleSheet.create({
       height: 4,
     },
     shadowOpacity: 0.1,
+    elevation: 5,
   },
   menuItem: {
     paddingVertical: 15,
@@ -211,17 +213,12 @@ const style = StyleSheet.create({
     justifyContent: 'space-between',
   },
   notificationItem: {
-    width: 'auto',
     paddingHorizontal: 20,
     paddingVertical: 17,
     borderRadius: 10,
     backgroundColor: theme.color.lightGray1,
   },
   selectedNotificationItem: {
-    width: 'auto',
-    paddingHorizontal: 20,
-    paddingVertical: 17,
-    borderRadius: 10,
     backgroundColor: theme.color.main,
   },
   notificationItemText: {
