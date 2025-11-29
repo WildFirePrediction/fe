@@ -18,6 +18,8 @@ import BackArrow from './BackArrow.svg';
 import Call from './Call.svg';
 import Arrow from './Arrow.svg';
 import Information from './Information.svg';
+import Fire from './Fire.svg';
+import MyPage from './MyPage.svg';
 
 export { NavigationArrow };
 export { Setting as SettingIcon };
@@ -39,3 +41,5 @@ export { BackArrow as BackArrowIcon };
 export { Call as CallIcon };
 export { Arrow as ArrowIcon };
 export { Information as InformationIcon };
+export { Fire as FireIcon };
+export { MyPage as MyPageIcon };
