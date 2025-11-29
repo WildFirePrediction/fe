@@ -2,6 +2,7 @@ import { StyleProp, StyleSheet, Text, TouchableOpacity, ViewStyle } from 'react-
 import theme from '../../styles/theme';
 import { NavigationArrow, SettingIcon } from '../../assets/svgs/icons';
 import React from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface ButtonProps {
   buttonType: 'action' | 'full' | 'setting' | 'floating';
@@ -52,11 +53,34 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   return (
-    <TouchableOpacity style={[getButtonStyle(), customStyle]} onPress={onClick}>
-      {(buttonType === 'setting' && <SettingIcon style={style.settingButtonIcon} />) ||
-        (buttonType === 'floating' && <NavigationArrow />)}
-      <Text style={getButtonTextStyle()}>{children}</Text>
-    </TouchableOpacity>
+    <>
+      {buttonType === 'floating' ? (
+        <TouchableOpacity
+          onPress={onClick}
+          style={style.floatingButtonContainer}
+          activeOpacity={0.7}
+        >
+          <LinearGradient
+            style={[getButtonStyle(), customStyle]}
+            colors={[theme.color.main, theme.color.mainGradient]}
+            start={{ x: 0.2, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <NavigationArrow />
+            <Text style={getButtonTextStyle()}>{children}</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={[getButtonStyle(), customStyle]}
+          onPress={onClick}
+          activeOpacity={0.7}
+        >
+          {buttonType === 'setting' && <SettingIcon style={style.settingButtonIcon} />}
+          <Text style={getButtonTextStyle()}>{children}</Text>
+        </TouchableOpacity>
+      )}
+    </>
   );
 };
 
@@ -121,6 +145,15 @@ const style = StyleSheet.create({
   fullButtonWhiteTextStyle: {
     color: theme.color.black,
   },
+  floatingButtonContainer: {
+    shadowColor: theme.color.black,
+    shadowOpacity: 0.25,
+    shadowOffset: {
+      width: 4,
+      height: 4,
+    },
+    elevation: 5,
+  },
   floatingButtonStyle: {
     paddingVertical: 16,
     paddingHorizontal: 15,
@@ -130,14 +163,8 @@ const style = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 6,
-    shadowColor: theme.color.black,
-    shadowOpacity: 0.25,
-    shadowOffset: {
-      width: 4,
-      height: 4,
-    },
-    elevation: 5,
   },
+
   floatingButtonTextStyle: {
     fontSize: 16,
     color: theme.color.white,

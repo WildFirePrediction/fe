@@ -5,6 +5,7 @@ const theme = {
     main: '#FF7451',
     mainTransparent: '#FF6A6733',
     mainBackground: '#FFE2D7',
+    mainGradient: '#FFAC8D',
     point: '#00317B',
     darkGray1: '#919191',
     darkGray2: '#6E6E6E',
