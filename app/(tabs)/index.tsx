@@ -12,7 +12,7 @@ import {
   NaverMapViewRef,
 } from '@mj-studio/react-native-naver-map';
 import theme from '../../styles/theme';
-import { RainIcon } from '../../assets/svgs/icons';
+import { AlertBellIcon, BubbleTail, RainIcon } from '../../assets/svgs/icons';
 import { coordsFire, coordsFirePredict } from '../../mock/fireAreaData';
 import { myRegionData } from '../../mock/myRegionsData';
 import { useRouter } from 'expo-router';
@@ -96,11 +96,23 @@ const WildFireMapScreen = () => {
             outlineWidth={1}
           />
         </NaverMapView>
+        <View style={style.alertPopup}>
+          <AlertBellIcon />
+          <Text style={style.alertPopupText}>산불이 발생했습니다. 신속하게 대피하세요</Text>
+        </View>
         <Animated.View style={[style.floatingButtonsContainer, floatingButtonsAnimatedStyle]}>
           <MapButton onClick={moveToCurrentLocation} />
-          <Button buttonType="floating" onClick={() => handleNavigateToEvacuation()}>
-            대피 안내
-          </Button>
+          <View style={style.navigationButtonContainer}>
+            <View style={style.popupBubbleContainer}>
+              <View style={style.popupBubble}>
+                <Text style={style.popupBubbleText}>산불 대피 안내를 시작하세요</Text>
+              </View>
+              <BubbleTail style={style.popupBubbleTail} />
+            </View>
+            <Button buttonType="floating" onClick={() => handleNavigateToEvacuation()}>
+              대피 안내
+            </Button>
+          </View>
         </Animated.View>
         <BottomSheet
           style={style.bottomSheet}
@@ -193,6 +205,58 @@ const style = StyleSheet.create({
     right: 10,
     alignSelf: 'flex-end',
     alignItems: 'flex-end',
-    gap: 20,
+    // gap: 2,
+  },
+  navigationButtonContainer: {
+    marginTop: -20,
+    alignItems: 'flex-end',
+  },
+  alertPopup: {
+    position: 'absolute',
+    top: 90,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: theme.color.point,
+    alignItems: 'center',
+    shadowColor: theme.color.black,
+    shadowOpacity: 0.25,
+    shadowOffset: {
+      width: 4,
+      height: 4,
+    },
+    elevation: 5,
+  },
+  alertPopupText: {
+    fontSize: 15,
+    color: theme.color.white,
+    fontWeight: 'bold',
+  },
+  popupBubbleContainer: {
+    alignItems: 'flex-end',
+    marginEnd: 60,
+    shadowColor: theme.color.black,
+    shadowOpacity: 0.25,
+    shadowOffset: {
+      width: 4,
+      height: 4,
+    },
+    elevation: 5,
+  },
+  popupBubble: {
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: theme.color.darkGray2,
+  },
+  popupBubbleText: {
+    fontSize: 11,
+    color: theme.color.white,
+  },
+  popupBubbleTail: {
+    marginTop: -7,
+    marginEnd: 20,
   },
 });
