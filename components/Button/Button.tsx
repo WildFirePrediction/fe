@@ -53,7 +53,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <TouchableOpacity style={[getButtonStyle(), customStyle]} onPress={onClick}>
-      {(buttonType === 'setting' && <SettingIcon />) ||
+      {(buttonType === 'setting' && <SettingIcon style={style.settingButtonIcon} />) ||
         (buttonType === 'floating' && <NavigationArrow />)}
       <Text style={getButtonTextStyle()}>{children}</Text>
     </TouchableOpacity>
@@ -79,6 +79,10 @@ const style = StyleSheet.create({
   settingButtonTextStyle: {
     fontSize: 16,
     color: theme.color.darkGray1,
+  },
+  settingButtonIcon: {
+    color: theme.color.darkGray1,
+    width: 13,
   },
   actionButtonStyle: {
     paddingVertical: 7,
@@ -132,6 +136,7 @@ const style = StyleSheet.create({
       width: 4,
       height: 4,
     },
+    elevation: 5,
   },
   floatingButtonTextStyle: {
     fontSize: 16,

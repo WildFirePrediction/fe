@@ -11,7 +11,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { BackArrowIcon } from '../assets/svgs/icons';
 import { ScrollView } from 'react-native';
-import { disasterCategories, disasterMap } from '../constants/categories';
+import { disastersKor, disasterMap } from '../constants/categories';
 import { myRegionData } from '../mock/myRegionsData';
 import { MapButton, SelectionButton } from '../components';
 import { Disaster } from '../types/disaster';
@@ -107,7 +107,7 @@ const DisasterInfoMap = () => {
               </ScrollView>
             </View>
             <View style={style.categoryContainer}>
-              {disasterCategories.map(category => (
+              {disastersKor.map(category => (
                 <TouchableOpacity
                   key={category}
                   style={
@@ -177,6 +177,7 @@ const style = StyleSheet.create({
       width: 4,
       height: 4,
     },
+    elevation: 5,
   },
   regionSelectionListContainer: {
     flexDirection: 'row',

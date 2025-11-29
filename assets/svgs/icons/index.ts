@@ -15,6 +15,9 @@ import Flood from './Flood.svg';
 import Dust from './Dust.svg';
 import Snow from './Snow.svg';
 import BackArrow from './BackArrow.svg';
+import Call from './Call.svg';
+import Arrow from './Arrow.svg';
+import Information from './Information.svg';
 
 export { NavigationArrow };
 export { Setting as SettingIcon };
@@ -33,3 +36,6 @@ export { Flood as FloodIcon };
 export { Dust as DustIcon };
 export { Snow as SnowIcon };
 export { BackArrow as BackArrowIcon };
+export { Call as CallIcon };
+export { Arrow as ArrowIcon };
+export { Information as InformationIcon };
