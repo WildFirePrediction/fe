@@ -56,7 +56,7 @@ const EvacuationRoute = () => {
   };
 
   useEffect(() => {
-    mapRef.current?.setLocationTrackingMode('NoFollow');
+    mapRef.current?.setLocationTrackingMode('Face');
     setCurrentPosition();
   }, []);
 

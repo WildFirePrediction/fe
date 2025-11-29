@@ -172,6 +172,7 @@ const style = StyleSheet.create({
   categoryContainer: {
     marginTop: 20,
     height: 196,
+    alignSelf: 'center',
   },
   columnWrapperStyle: {
     marginBottom: 15,
