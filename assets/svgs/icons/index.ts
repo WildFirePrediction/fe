@@ -22,6 +22,7 @@ import Fire from './Fire.svg';
 import MyPage from './MyPage.svg';
 import BubbleTail from './BubbleTail.svg';
 import AlertBell from './AlertBell.svg';
+import DownArrow from './DownArrow.svg';
 
 export { NavigationArrow };
 export { Setting as SettingIcon };
@@ -47,3 +48,4 @@ export { Fire as FireIcon };
 export { MyPage as MyPageIcon };
 export { BubbleTail };
 export { AlertBell as AlertBellIcon };
+export { DownArrow as DownArrowIcon };
