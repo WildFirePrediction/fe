@@ -27,6 +27,7 @@ const WildFireMapScreen = () => {
   const [camera, setCamera] = useState<Camera | undefined>(myRegionData.at(0));
   const [isWeatherReportOpen, setIsWeatherReportOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState<Record<number, boolean>>({});
+  const [isFireOccur, setIsFireOccur] = useState(true);
   const bottomSheetPosition = useSharedValue<number>(0);
 
   const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
@@ -112,23 +113,27 @@ const WildFireMapScreen = () => {
             outlineWidth={1}
           />
         </NaverMapView>
-        <View style={style.alertPopup}>
-          <AlertBellIcon style={style.alertPopupIcon} />
-          <Text style={style.alertPopupText}>산불이 발생했습니다. 신속하게 대피하세요</Text>
-        </View>
+        {isFireOccur && (
+          <View style={style.alertPopup}>
+            <AlertBellIcon style={style.alertPopupIcon} />
+            <Text style={style.alertPopupText}>산불이 발생했습니다. 신속하게 대피하세요</Text>
+          </View>
+        )}
         <Animated.View style={[style.floatingButtonsContainer, floatingButtonsAnimatedStyle]}>
           <MapButton onClick={moveToCurrentLocation} />
-          <View style={style.navigationButtonContainer}>
-            <View style={style.popupBubbleContainer}>
-              <View style={style.popupBubble}>
-                <Text style={style.popupBubbleText}>산불 대피 안내를 시작하세요</Text>
+          {isFireOccur && (
+            <View style={style.navigationButtonContainer}>
+              <View style={style.popupBubbleContainer}>
+                <View style={style.popupBubble}>
+                  <Text style={style.popupBubbleText}>산불 대피 안내를 시작하세요</Text>
+                </View>
+                <BubbleTail style={style.popupBubbleTail} />
               </View>
-              <BubbleTail style={style.popupBubbleTail} />
+              <Button buttonType="floating" onClick={() => handleNavigateToEvacuation()}>
+                대피 안내
+              </Button>
             </View>
-            <Button buttonType="floating" onClick={() => handleNavigateToEvacuation()}>
-              대피 안내
-            </Button>
-          </View>
+          )}
         </Animated.View>
         <BottomSheet
           style={style.bottomSheet}
