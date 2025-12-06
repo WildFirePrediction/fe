@@ -11,7 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CancelIcon, WarningIcon } from '../../../assets/svgs/icons';
 import { useEffect, useRef, useState } from 'react';
-import { evacuationRouteData } from '../../../mock/evacuationRouteData';
+import { evacuationRouteData, evacuationRouteData2 } from '../../../mock/evacuationRouteData';
 import theme from '../../../styles/theme';
 import { coordsFire, coordsFirePredict } from '../../../mock/fireAreaData';
 import * as Location from 'expo-location';
@@ -85,7 +85,10 @@ const EvacuationRoute = () => {
               outlineWidth={1}
             />
             <NaverMapPathOverlay
-              coords={evacuationRouteData}
+              coords={evacuationRouteData2.path.map(coord => ({
+                latitude: coord[1],
+                longitude: coord[0],
+              }))}
               width={12}
               color={theme.color.rain}
               outlineWidth={2}
