@@ -21,6 +21,16 @@ const theme = {
     messageLandslide: '#D96900',
     black: '#000000',
     white: '#FFFFFF',
+    fire1: '#FF5252',
+    fire2: '#FF685B',
+    fire3: '#FF6F43',
+    fire4: '#FF9843',
+    fire5: '#FF9E43',
+    fireLayer1: '#FF52524D',
+    fireLayer2: '#FF685B4D',
+    fireLayer3: '#FF6F434D',
+    fireLayer4: '#FF98432D',
+    fireLayer5: '#FF9E432D',
   },
 };
 export default theme;
