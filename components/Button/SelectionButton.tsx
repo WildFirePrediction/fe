@@ -15,6 +15,7 @@ const SelectionButton = ({ children, selected, onClick }: SelectionButtonProps) 
         selected ? style.selectedButtonStyle : style.unselectedButtonStyle,
       ]}
       onPress={() => onClick(children)}
+      activeOpacity={0.8}
     >
       <Text style={selected ? style.selectedButtonTextStyle : style.unselectedButtonTextStyle}>
         {children}

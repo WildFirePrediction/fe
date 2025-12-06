@@ -9,7 +9,8 @@ const RootLayout = () => {
           headerShown: false,
         }}
       />
-      <Stack.Screen name="shelters" options={{ headerShown: false }} />
+      <Stack.Screen name="shelters/index" options={{ headerShown: false }} />
+      <Stack.Screen name="shelters/[slug]" options={{ headerShown: false }} />
       <Stack.Screen name="routePreview/[slug]" options={{ headerShown: false }} />
       <Stack.Screen name="route/[slug]" options={{ headerShown: false }} />
     </Stack>

@@ -29,3 +29,19 @@ export const disasterColorMap: Record<Disaster, string> = {
   SNOW: theme.color.snow,
   DUST: theme.color.dust,
 };
+
+export const fireTimestepMap: Record<number, string> = {
+  1: theme.color.fire1,
+  2: theme.color.fire2,
+  3: theme.color.fire3,
+  4: theme.color.fire4,
+  5: theme.color.fire5,
+};
+
+export const fireTimestepLayerMap: Record<number, string> = {
+  1: theme.color.fireLayer1,
+  2: theme.color.fireLayer2,
+  3: theme.color.fireLayer3,
+  4: theme.color.fireLayer4,
+  5: theme.color.fireLayer5,
+};

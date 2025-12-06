@@ -9,8 +9,12 @@ interface MapButtonProps {
 }
 const MapButton: React.FC<MapButtonProps> = ({ onClick, customStyle }: MapButtonProps) => {
   return (
-    <TouchableOpacity style={[style.buttonStyle, customStyle]} onPress={onClick}>
-      <LocationIcon />
+    <TouchableOpacity
+      style={[style.buttonStyle, customStyle]}
+      onPress={onClick}
+      activeOpacity={0.5}
+    >
+      <LocationIcon width={29} height={29} />
     </TouchableOpacity>
   );
 };
@@ -19,10 +23,12 @@ export default MapButton;
 
 const style = StyleSheet.create({
   buttonStyle: {
-    width: 56,
-    height: 56,
-    borderRadius: '50%',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: theme.color.white,
+    borderWidth: 1,
+    borderColor: theme.color.gray,
     shadowOpacity: 0.1,
     shadowOffset: {
       width: 4,
