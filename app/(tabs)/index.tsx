@@ -13,11 +13,14 @@ import {
 } from '@mj-studio/react-native-naver-map';
 import theme from '../../styles/theme';
 import { AlertBellIcon, BubbleTail, DownArrowIcon, RainIcon } from '../../assets/svgs/icons';
-import { coordsFire, coordsFirePredict } from '../../mock/fireAreaData';
 import { myRegionData } from '../../mock/myRegionsData';
 import { useRouter } from 'expo-router';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { disasterTextData } from '../../mock/disasterTextData';
+import { firePredictionData } from '../../mock/firePredictionData';
+import { fireTimestepLayerMap, fireTimestepMap } from '../../constants/categories';
+import { FullCoord } from '../../types/locationCoord';
+import { makeConvexHullLatLng, createCirclePolygon, coordsToFullCoords } from '../../utils/mapUtil';
 
 const WildFireMapScreen = () => {
   const router = useRouter();
@@ -100,18 +103,51 @@ const WildFireMapScreen = () => {
           isShowLocationButton={false}
           locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
         >
-          <NaverMapPolygonOverlay
-            coords={coordsFire}
-            color={theme.color.mainTransparent}
-            outlineColor={theme.color.main}
-            outlineWidth={1}
-          />
-          <NaverMapPolygonOverlay
-            coords={coordsFirePredict}
-            color={theme.color.mainTransparent}
-            outlineColor={theme.color.main}
-            outlineWidth={1}
-          />
+          {firePredictionData.predictions.map(step => {
+            const fillColor = fireTimestepMap[step.timestep];
+            return (
+              <>
+                {step.predicted_cells.map((cell, idx) => {
+                  const cellCenter: FullCoord = {
+                    latitude: cell.lat,
+                    longitude: cell.lon,
+                  };
+                  const CELL_RADIUS_M = 35;
+                  const coords = createCirclePolygon(cellCenter, CELL_RADIUS_M, 32);
+                  return (
+                    <NaverMapPolygonOverlay
+                      key={`${step.timestep}-${idx}`}
+                      coords={coords}
+                      color={fireTimestepLayerMap[step.timestep]}
+                      outlineWidth={1}
+                      outlineColor={fillColor}
+                    />
+                  );
+                })}
+              </>
+            );
+          })}
+          {firePredictionData.predictions.map(step => {
+            const center = {
+              latitude: firePredictionData.fire_location.lat,
+              longitude: firePredictionData.fire_location.lon,
+            };
+            const points = coordsToFullCoords(step.predicted_cells);
+
+            if (points.length === 0) return null;
+
+            const hullCoords = makeConvexHullLatLng(points, center.latitude);
+            return (
+              <NaverMapPolygonOverlay
+                key={step.timestep}
+                coords={hullCoords}
+                color={fireTimestepLayerMap[step.timestep]}
+                outlineWidth={1}
+                outlineColor={fireTimestepMap[step.timestep]}
+                zIndex={5 - step.timestep}
+              />
+            );
+          })}
         </NaverMapView>
         {isFireOccur && (
           <View style={style.alertPopup}>
