@@ -32,7 +32,7 @@ const MyPageScreen = () => {
       <View style={style.header}>
         <Text style={style.headerText}>마이페이지</Text>
       </View>
-      <View style={style.callSettingContainer}>
+      {/* <View style={style.callSettingContainer}>
         <View style={style.callSettingHeader}>
           <CallIcon width={21} height={21} />
           <Text style={style.callSettingText}>전화 대피 안내 서비스</Text>
@@ -47,7 +47,7 @@ const MyPageScreen = () => {
           전화 대피 안내 서비스는 산불 발생 시 전화로 재난 발생 상황 및 대피 안내를 제공하는
           서비스입니다.
         </Text>
-      </View>
+      </View> */}
       <View style={style.section}>
         <View style={style.sectionLabel}>
           <SettingIcon style={style.sectionLabelIcon} width={18} height={18} />
