@@ -68,6 +68,7 @@ module.exports = defineConfig([
       'react-hooks/set-state-in-effect': 'warn',
       '@typescript-eslint/no-require-imports': 'off',
       'eslint(react-hooks/set-state-in-effect': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
 
       'prettier/prettier': [
         'error',
