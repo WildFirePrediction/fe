@@ -235,9 +235,9 @@ const WildFireMapScreen = () => {
               </View>
               <View style={style.bottomSheetSection}>
                 <Text style={style.bottomSheetSectionLabel}>재난 문자</Text>
-                {disasterTextData.map((item, index) => (
+                {disasterTextData.map(item => (
                   <TouchableOpacity
-                    key={`${item}-${index}`}
+                    key={item.id}
                     style={style.bottomSheetMessageContainer}
                     onPress={() => handleToggleMessage(item.id)}
                     activeOpacity={1}
@@ -245,7 +245,7 @@ const WildFireMapScreen = () => {
                     <View style={style.bottomSheetWeatherReportTitle}>
                       <View
                         style={{
-                          ...style.bottomSheetaMessageBadge,
+                          ...style.bottomSheetMessageBadge,
                           backgroundColor: theme.color.rain,
                         }}
                       >
@@ -254,7 +254,7 @@ const WildFireMapScreen = () => {
                           height={18}
                           style={style.bottomSheetMessageBadgeIcon}
                         />
-                        <Text style={style.bottomSheetaMessageBadgeText}>호우</Text>
+                        <Text style={style.bottomSheetMessageBadgeText}>호우</Text>
                       </View>
                       <Text style={style.bottomSheetMessageTitleText}>횡성</Text>
                       <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
@@ -396,7 +396,7 @@ const style = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  bottomSheetaMessageBadge: {
+  bottomSheetMessageBadge: {
     paddingHorizontal: 10,
     paddingVertical: 7,
     flexDirection: 'row',
@@ -408,7 +408,7 @@ const style = StyleSheet.create({
     color: theme.color.white,
     width: 18,
   },
-  bottomSheetaMessageBadgeText: {
+  bottomSheetMessageBadgeText: {
     fontSize: 14,
     color: theme.color.white,
   },

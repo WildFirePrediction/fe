@@ -20,15 +20,15 @@ const ShelterDetail = () => {
       <View style={style.bodyContainer}>
         <Text style={style.titleText}>{shelterDetailData.name}</Text>
         <View style={style.informationConatiner}>
-          <View key={'주소'} style={style.informationElement}>
+          <View style={style.informationElement}>
             <Text style={style.informationLabelText}>주소</Text>
             <Text style={style.informationContentText}>{shelterDetailData.address}</Text>
           </View>
-          <View key={'면적'} style={style.informationElement}>
+          <View style={style.informationElement}>
             <Text style={style.informationLabelText}>면적</Text>
             <Text style={style.informationContentText}>{shelterDetailData.size} m²</Text>
           </View>
-          <View key={'수용인원'} style={style.informationElement}>
+          <View style={style.informationElement}>
             <Text style={style.informationLabelText}>수용인원</Text>
             <Text style={style.informationContentText}>{shelterDetailData.people}명</Text>
           </View>

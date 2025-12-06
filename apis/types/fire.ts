@@ -2,8 +2,8 @@ import { LocationCoord } from '../../types/locationCoord';
 
 export interface FirePredictionResponse {
   fire_id: string;
-  fireLocation: LocationCoord;
-  prediction: FirePrediction;
+  fire_location: LocationCoord;
+  predictions: FirePrediction[];
 }
 
 export interface FirePrediction {
