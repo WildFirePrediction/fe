@@ -106,7 +106,7 @@ const WildFireMapScreen = () => {
           {firePredictionData.predictions.map(step => {
             const fillColor = fireTimestepMap[step.timestep];
             return (
-              <>
+              <View key={step.timestep}>
                 {step.predicted_cells.map((cell, idx) => {
                   const cellCenter: FullCoord = {
                     latitude: cell.lat,
@@ -124,7 +124,7 @@ const WildFireMapScreen = () => {
                     />
                   );
                 })}
-              </>
+              </View>
             );
           })}
           {firePredictionData.predictions.map(step => {
