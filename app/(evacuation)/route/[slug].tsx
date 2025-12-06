@@ -15,6 +15,8 @@ import { evacuationRouteData, evacuationRouteData2 } from '../../../mock/evacuat
 import theme from '../../../styles/theme';
 import { coordsFire, coordsFirePredict } from '../../../mock/fireAreaData';
 import * as Location from 'expo-location';
+import useGetRoutes from '../../../apis/hooks/usePostRoutes';
+import { PostRoutesResponse } from '../../../apis/types/route';
 
 const EvacuationRoute = () => {
   const router = useRouter();
@@ -26,6 +28,9 @@ const EvacuationRoute = () => {
     zoom: 15,
     bearing: 0,
   });
+  const [route, setRoute] = useState<PostRoutesResponse | null>(null);
+
+  const postRoute = useGetRoutes();
 
   const handleGoBack = () => {
     router.back();
@@ -58,6 +63,19 @@ const EvacuationRoute = () => {
   useEffect(() => {
     mapRef.current?.setLocationTrackingMode('Face');
     setCurrentPosition();
+    postRoute.mutate(
+      {
+        startLat: myLocation.latitude,
+        startLon: myLocation.longitude,
+        endLat: 37.506038005044,
+        endLon: 126.960421779226,
+      },
+      {
+        onSuccess: response => {
+          if (response.result) setRoute(response.result);
+        },
+      },
+    );
   }, []);
 
   return (
@@ -84,16 +102,18 @@ const EvacuationRoute = () => {
               outlineColor={theme.color.main}
               outlineWidth={1}
             />
-            <NaverMapPathOverlay
-              coords={evacuationRouteData2.path.map(coord => ({
-                latitude: coord[1],
-                longitude: coord[0],
-              }))}
-              width={12}
-              color={theme.color.rain}
-              outlineWidth={2}
-              outlineColor={theme.color.white}
-            />
+            {route && (
+              <NaverMapPathOverlay
+                coords={route.path.map(coord => ({
+                  latitude: coord[1],
+                  longitude: coord[0],
+                }))}
+                width={12}
+                color={theme.color.rain}
+                outlineWidth={2}
+                outlineColor={theme.color.white}
+              />
+            )}
             <NaverMapMarkerOverlay
               latitude={myLocation.latitude}
               longitude={myLocation.longitude}
