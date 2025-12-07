@@ -8,5 +8,5 @@ export interface PostRoutesParams {
 export interface PostRoutesResponse {
   totalDistance: number;
   totalTime: number;
-  path: number[][];
+  path: [number, number][];
 }
