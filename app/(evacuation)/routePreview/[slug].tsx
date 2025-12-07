@@ -1,4 +1,5 @@
 import {
+  Camera,
   NaverMapMarkerOverlay,
   NaverMapPathOverlay,
   NaverMapPolygonOverlay,
@@ -12,22 +13,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CancelIcon } from '../../../assets/svgs/icons';
 import { Button } from '../../../components';
 import { useEffect, useRef, useState } from 'react';
-import { evacuationRouteData } from '../../../mock/evacuationRouteData';
 import theme from '../../../styles/theme';
 import { coordsFire, coordsFirePredict } from '../../../mock/fireAreaData';
 import * as Location from 'expo-location';
+import { getBearing } from '../../../utils/mapUtil';
+import usePostRoutes from '../../../apis/hooks/usePostRoutes';
+import { FullCoord } from '../../../types/locationCoord';
+import { useDestination } from '../../../context/destinationContext';
 
 const EvacuationRoutePreview = () => {
   const router = useRouter();
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const mapRef = useRef<NaverMapViewRef>(null);
 
-  const [myLocation, setMyLocation] = useState({
-    latitude: 37.505278,
-    longitude: 126.954613,
-    zoom: 15,
-    bearing: 0,
-  });
+  const { destination } = useDestination();
+
+  const [startLocation, setStartLocation] = useState<Camera | undefined>();
+  const [route, setRoute] = useState<FullCoord[] | null>(null);
+
+  const postRoute = usePostRoutes();
 
   const handleGoBack = () => {
     router.back();
@@ -38,33 +42,48 @@ const EvacuationRoutePreview = () => {
   };
 
   const setCurrentPosition = async () => {
+    if (!destination) return;
+
     const position = await Location.getCurrentPositionAsync();
 
-    const lat1 = position.coords.latitude;
-    const lon1 = position.coords.longitude;
-
-    const last = evacuationRouteData.at(-1) ?? { latitude: lat1, longitude: lon1 };
-    const lat2 = last.latitude;
-    const lon2 = last.longitude;
-
-    const y = Math.sin(lon2 - lon1) * Math.cos(lat2);
-    const x =
-      Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
-    let bearing = Math.atan2(y, x);
-    bearing = (bearing * 180) / Math.PI;
-    bearing = (bearing + 360) % 360;
-    setMyLocation({
-      latitude: lat1,
-      longitude: lon1,
+    const startLat = position.coords.latitude;
+    const startLon = position.coords.longitude;
+    const bearing = getBearing(position, destination);
+    setStartLocation({
+      latitude: startLat,
+      longitude: startLon,
       zoom: 15,
       bearing: bearing,
     });
+
+    postRoute.mutate(
+      {
+        startLat: startLat,
+        startLon: startLon,
+        endLat: destination.latitude,
+        endLon: destination.longitude,
+      },
+      {
+        onSuccess: response => {
+          if (response.result)
+            setRoute(
+              response.result.path.map(coord => ({
+                latitude: coord[1],
+                longitude: coord[0],
+              })),
+            );
+        },
+      },
+    );
   };
 
   useEffect(() => {
     mapRef.current?.setLocationTrackingMode('NoFollow');
-    setCurrentPosition();
   }, []);
+
+  useEffect(() => {
+    setCurrentPosition();
+  }, [destination]);
 
   return (
     <GestureHandlerRootView>
@@ -73,7 +92,7 @@ const EvacuationRoutePreview = () => {
           <NaverMapView
             ref={mapRef}
             style={style.naverMap}
-            camera={myLocation}
+            camera={startLocation}
             isShowCompass={false}
             isShowLocationButton={false}
             locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
@@ -90,24 +109,28 @@ const EvacuationRoutePreview = () => {
               outlineColor={theme.color.main}
               outlineWidth={1}
             />
-            <NaverMapPathOverlay
-              coords={evacuationRouteData}
-              width={12}
-              color={theme.color.rain}
-              outlineWidth={2}
-              outlineColor={theme.color.white}
-            />
-            <NaverMapMarkerOverlay
-              latitude={myLocation.latitude}
-              longitude={myLocation.longitude}
-              image={require('../../../assets/pngs/departureMarker.png')}
-            />
-            {evacuationRouteData.at(-1) !== undefined && (
+            {route && (
+              <NaverMapPathOverlay
+                coords={route}
+                width={12}
+                color={theme.color.rain}
+                outlineWidth={2}
+                outlineColor={theme.color.white}
+              />
+            )}
+            {startLocation && (
               <NaverMapMarkerOverlay
-                latitude={evacuationRouteData.at(-1)?.latitude ?? myLocation.latitude}
-                longitude={evacuationRouteData.at(-1)?.longitude ?? myLocation.longitude}
+                latitude={startLocation.latitude}
+                longitude={startLocation.longitude}
+                image={require('../../../assets/pngs/departureMarker.png')}
+              />
+            )}
+            {destination && (
+              <NaverMapMarkerOverlay
+                latitude={destination.latitude}
+                longitude={destination.longitude}
                 caption={{
-                  text: '중앙대학교병원중앙관 지하주차장 1~3층 대피소',
+                  text: destination.name,
                   requestedWidth: 30,
                 }}
                 image={require('../../../assets/pngs/arriveMarker.png')}

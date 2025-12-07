@@ -21,6 +21,8 @@ import { firePredictionData } from '../../mock/firePredictionData';
 import { fireTimestepLayerMap, fireTimestepMap } from '../../constants/categories';
 import { FullCoord } from '../../types/locationCoord';
 import { makeConvexHullLatLng, createCirclePolygon, coordsToFullCoords } from '../../utils/mapUtil';
+import { getStorageItem } from '../../utils/storageUtil';
+import { ASYNC_STORAGE_KEYS } from '../../constants/storageKey';
 
 const WildFireMapScreen = () => {
   const router = useRouter();
@@ -81,6 +83,13 @@ const WildFireMapScreen = () => {
           await Location.requestBackgroundPermissionsAsync();
           mapRef.current?.setLocationTrackingMode('NoFollow');
           setCamera(selectedRegion ? { ...selectedRegion, zoom: 13.5 } : selectedRegion);
+
+          const myRegions = await getStorageItem<string[]>(ASYNC_STORAGE_KEYS.MY_REGIONS);
+          if (myRegions === null) {
+            const currentLocation = await Location.getCurrentPositionAsync();
+            // TODO: 백엔드에 내 지역 POST
+            // TODO: AsyncStorage에 지역 저장
+          }
         }
       } catch (e) {
         console.error(`Location request has been failed: ${e}`);
