@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getDeviceId } from '../../utils/devideId';
+import { getDeviceId } from '../../utils/deviceId';
 
 const baseURL = process.env.EXPO_PUBLIC_BASE_URL;
 
