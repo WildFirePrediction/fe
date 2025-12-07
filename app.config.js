@@ -24,6 +24,9 @@ export default {
       bundleIdentifier: 'com.seoyeonyu.CAPSTONE25FE',
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
+        NSAppTransportSecurity: {
+          NSAllowsArbitraryLoads: true,
+        },
       },
     },
     android: {

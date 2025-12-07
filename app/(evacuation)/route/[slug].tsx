@@ -1,4 +1,5 @@
 import {
+  Camera,
   NaverMapMarkerOverlay,
   NaverMapPathOverlay,
   NaverMapPolygonOverlay,
@@ -15,17 +16,24 @@ import { evacuationRouteData, evacuationRouteData2 } from '../../../mock/evacuat
 import theme from '../../../styles/theme';
 import { coordsFire, coordsFirePredict } from '../../../mock/fireAreaData';
 import * as Location from 'expo-location';
+import usePostRoutes from '../../../apis/hooks/usePostRoutes';
+import { PostRoutesResponse } from '../../../apis/types/route';
+import { getBearing } from '../../../utils/mapUtil';
 
 const EvacuationRoute = () => {
   const router = useRouter();
   const mapRef = useRef<NaverMapViewRef>(null);
 
-  const [myLocation, setMyLocation] = useState({
+  // TODO: 로컬 스토리지의 내지역으로 초기화
+  const [myLocation, setMyLocation] = useState<Camera>({
     latitude: 37.505278,
     longitude: 126.954613,
     zoom: 15,
     bearing: 0,
   });
+  const [route, setRoute] = useState<PostRoutesResponse | null>(null);
+
+  const postRoute = usePostRoutes();
 
   const handleGoBack = () => {
     router.back();
@@ -33,26 +41,30 @@ const EvacuationRoute = () => {
 
   const setCurrentPosition = async () => {
     const position = await Location.getCurrentPositionAsync();
+    const startLat = position.coords.latitude;
+    const startLon = position.coords.longitude;
+    const bearing = getBearing(position, evacuationRouteData.at(-1) ?? position.coords);
 
-    const lat1 = position.coords.latitude;
-    const lon1 = position.coords.longitude;
-
-    const last = evacuationRouteData.at(-1) ?? { latitude: lat1, longitude: lon1 };
-    const lat2 = last.latitude;
-    const lon2 = last.longitude;
-
-    const y = Math.sin(lon2 - lon1) * Math.cos(lat2);
-    const x =
-      Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
-    let bearing = Math.atan2(y, x);
-    bearing = (bearing * 180) / Math.PI;
-    bearing = (bearing + 360) % 360;
     setMyLocation({
-      latitude: lat1,
-      longitude: lon1,
+      latitude: startLat,
+      longitude: startLon,
       zoom: 15,
       bearing: bearing,
     });
+
+    postRoute.mutate(
+      {
+        startLat: startLat,
+        startLon: startLon,
+        endLat: 37.506038005044,
+        endLon: 126.960421779226,
+      },
+      {
+        onSuccess: response => {
+          if (response.result) setRoute(response.result);
+        },
+      },
+    );
   };
 
   useEffect(() => {
@@ -84,16 +96,18 @@ const EvacuationRoute = () => {
               outlineColor={theme.color.main}
               outlineWidth={1}
             />
-            <NaverMapPathOverlay
-              coords={evacuationRouteData2.path.map(coord => ({
-                latitude: coord[1],
-                longitude: coord[0],
-              }))}
-              width={12}
-              color={theme.color.rain}
-              outlineWidth={2}
-              outlineColor={theme.color.white}
-            />
+            {route && (
+              <NaverMapPathOverlay
+                coords={route.path.map(coord => ({
+                  latitude: coord[1],
+                  longitude: coord[0],
+                }))}
+                width={12}
+                color={theme.color.rain}
+                outlineWidth={2}
+                outlineColor={theme.color.white}
+              />
+            )}
             <NaverMapMarkerOverlay
               latitude={myLocation.latitude}
               longitude={myLocation.longitude}
