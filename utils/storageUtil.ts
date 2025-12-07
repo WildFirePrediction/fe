@@ -6,7 +6,8 @@ export async function getStorageItem<T>(key: AsyncStorageKey) {
   if (!raw) return null;
   try {
     return JSON.parse(raw) as T;
-  } catch {
+  } catch (error) {
+    console.error('스토리지 아이템 파싱 실패', error);
     return null;
   }
 }

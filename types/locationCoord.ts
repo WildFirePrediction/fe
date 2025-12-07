@@ -8,8 +8,6 @@ export type FullCoord = {
   longitude: number;
 };
 
-export type FullCoordWithName = {
+export type FullCoordWithName = FullCoord & {
   name: string;
-  latitude: number;
-  longitude: number;
 };

@@ -84,7 +84,7 @@ const WildFireMapScreen = () => {
           mapRef.current?.setLocationTrackingMode('NoFollow');
           setCamera(selectedRegion ? { ...selectedRegion, zoom: 13.5 } : selectedRegion);
 
-          const myRegions = getStorageItem<string[]>(ASYNC_STORAGE_KEYS.MY_REGIONS);
+          const myRegions = await getStorageItem<string[]>(ASYNC_STORAGE_KEYS.MY_REGIONS);
           if (myRegions === null) {
             const currentLocation = await Location.getCurrentPositionAsync();
             // TODO: 백엔드에 내 지역 POST

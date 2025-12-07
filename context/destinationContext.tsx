@@ -15,7 +15,7 @@ const DestinationContext = createContext<DestinationContextType | null>(null);
 export const useDestination = () => {
   const context = useContext(DestinationContext);
   if (!context) {
-    throw new Error('context 오류');
+    throw new Error('destination context 오류');
   }
   return context;
 };
