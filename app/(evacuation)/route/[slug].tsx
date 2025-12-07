@@ -1,4 +1,5 @@
 import {
+  Camera,
   NaverMapMarkerOverlay,
   NaverMapPathOverlay,
   NaverMapPolygonOverlay,
@@ -22,7 +23,7 @@ const EvacuationRoute = () => {
   const router = useRouter();
   const mapRef = useRef<NaverMapViewRef>(null);
 
-  const [myLocation, setMyLocation] = useState({
+  const [myLocation, setMyLocation] = useState<Camera>({
     latitude: 37.505278,
     longitude: 126.954613,
     zoom: 15,
@@ -63,6 +64,9 @@ const EvacuationRoute = () => {
   useEffect(() => {
     mapRef.current?.setLocationTrackingMode('Face');
     setCurrentPosition();
+  }, []);
+
+  useEffect(() => {
     postRoute.mutate(
       {
         startLat: myLocation.latitude,
@@ -76,7 +80,7 @@ const EvacuationRoute = () => {
         },
       },
     );
-  }, []);
+  }, [myLocation]);
 
   return (
     <GestureHandlerRootView>
