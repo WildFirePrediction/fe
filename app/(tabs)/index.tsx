@@ -19,8 +19,11 @@ import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanima
 import { disasterTextData } from '../../mock/disasterTextData';
 import { firePredictionData } from '../../mock/firePredictionData';
 import { fireTimestepLayerMap, fireTimestepMap } from '../../constants/categories';
-import { FullCoord } from '../../types/locationCoord';
-import { makeConvexHullLatLng, createCirclePolygon, coordsToFullCoords } from '../../utils/mapUtil';
+import {
+  coordsToFullCoords,
+  buildPolygonForStep,
+  buildSquarePolygonForCell,
+} from '../../utils/mapUtil';
 import { getStorageItem } from '../../utils/storageUtil';
 import { ASYNC_STORAGE_KEYS } from '../../constants/storageKey';
 
@@ -117,19 +120,12 @@ const WildFireMapScreen = () => {
             return (
               <View key={step.timestep}>
                 {step.predicted_cells.map((cell, idx) => {
-                  const cellCenter: FullCoord = {
-                    latitude: cell.lat,
-                    longitude: cell.lon,
-                  };
-                  const CELL_RADIUS_M = 35;
-                  const coords = createCirclePolygon(cellCenter, CELL_RADIUS_M, 32);
+                  const coords = buildSquarePolygonForCell(cell);
                   return (
                     <NaverMapPolygonOverlay
                       key={`${step.timestep}-${idx}`}
                       coords={coords}
                       color={fireTimestepLayerMap[step.timestep]}
-                      outlineWidth={1}
-                      outlineColor={fillColor}
                     />
                   );
                 })}
@@ -142,16 +138,15 @@ const WildFireMapScreen = () => {
               longitude: firePredictionData.fire_location.lon,
             };
             const points = coordsToFullCoords(step.predicted_cells);
-
             if (points.length === 0) return null;
 
-            const hullCoords = makeConvexHullLatLng(points, center.latitude);
+            const hullCoords = buildPolygonForStep(step, center.latitude, center.longitude);
             return (
               <NaverMapPolygonOverlay
                 key={step.timestep}
                 coords={hullCoords}
                 color={fireTimestepLayerMap[step.timestep]}
-                outlineWidth={1}
+                outlineWidth={2}
                 outlineColor={fireTimestepMap[step.timestep]}
                 zIndex={5 - step.timestep}
               />
