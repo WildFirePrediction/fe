@@ -46,7 +46,7 @@ const WildFireMapScreen = () => {
   const bottomSheetPosition = useSharedValue<number>(0);
 
   const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
-    top: bottomSheetPosition.value - 150,
+    top: bottomSheetPosition.value - (isFireOccur ? 190 : 70),
   }));
 
   const handleSelectRegion = (regionName: string) => {
@@ -83,6 +83,14 @@ const WildFireMapScreen = () => {
     } catch (error) {
       console.error('Cannot get location information:', error);
     }
+  };
+
+  const moveToFire = () => {
+    mapRef.current?.animateCameraTo({
+      latitude: firePredictionData.fire_location.lat,
+      longitude: firePredictionData.fire_location.lon,
+      zoom: 13.5,
+    });
   };
 
   useEffect(() => {
@@ -123,7 +131,6 @@ const WildFireMapScreen = () => {
           locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
         >
           {firePredictionData.predictions.map(step => {
-            const fillColor = fireTimestepMap[step.timestep];
             return (
               <View key={step.timestep}>
                 {step.predicted_cells.map((cell, idx) => {
@@ -177,6 +184,9 @@ const WildFireMapScreen = () => {
           </View>
         )}
         <Animated.View style={[style.floatingButtonsContainer, floatingButtonsAnimatedStyle]}>
+          {isFireOccur && (
+            <MapButton type="fire" customStyle={style.fireMapButton} onClick={moveToFire} />
+          )}
           <MapButton onClick={moveToCurrentLocation} />
           {isFireOccur && (
             <View style={style.navigationButtonContainer}>
@@ -442,6 +452,9 @@ const style = StyleSheet.create({
     right: 10,
     alignSelf: 'flex-end',
     alignItems: 'flex-end',
+  },
+  fireMapButton: {
+    marginBottom: 10,
   },
   navigationButtonContainer: {
     marginTop: -20,

@@ -24,6 +24,7 @@ import BubbleTail from './BubbleTail.svg';
 import AlertBell from './AlertBell.svg';
 import DownArrow from './DownArrow.svg';
 import TimeStepMarker from './TimeStepMarker.svg';
+import Flame from './Flame.svg';
 
 export { NavigationArrow };
 export { Setting as SettingIcon };
@@ -51,3 +52,4 @@ export { BubbleTail };
 export { AlertBell as AlertBellIcon };
 export { DownArrow as DownArrowIcon };
 export { TimeStepMarker };
+export { Flame as FlameIcon };
