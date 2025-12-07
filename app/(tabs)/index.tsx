@@ -7,12 +7,19 @@ import { Button, MapButton, SelectionButton } from '../../components';
 import * as Location from 'expo-location';
 import {
   Camera,
+  NaverMapMarkerOverlay,
   NaverMapPolygonOverlay,
   NaverMapView,
   NaverMapViewRef,
 } from '@mj-studio/react-native-naver-map';
 import theme from '../../styles/theme';
-import { AlertBellIcon, BubbleTail, DownArrowIcon, RainIcon } from '../../assets/svgs/icons';
+import {
+  AlertBellIcon,
+  BubbleTail,
+  DownArrowIcon,
+  RainIcon,
+  TimeStepMarker,
+} from '../../assets/svgs/icons';
 import { myRegionData } from '../../mock/myRegionsData';
 import { useRouter } from 'expo-router';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
@@ -142,14 +149,24 @@ const WildFireMapScreen = () => {
 
             const hullCoords = buildPolygonForStep(step, center.latitude, center.longitude);
             return (
-              <NaverMapPolygonOverlay
-                key={step.timestep}
-                coords={hullCoords}
-                color={fireTimestepLayerMap[step.timestep]}
-                outlineWidth={2}
-                outlineColor={fireTimestepMap[step.timestep]}
-                zIndex={5 - step.timestep}
-              />
+              <View key={`${step.timestep}`}>
+                <NaverMapMarkerOverlay
+                  key={`${step.timestep}-marker`}
+                  latitude={hullCoords[0].latitude}
+                  longitude={hullCoords[0].longitude}
+                  caption={{ text: `${step.timestep * 10}분 후` }}
+                >
+                  <TimeStepMarker />
+                </NaverMapMarkerOverlay>
+                <NaverMapPolygonOverlay
+                  key={step.timestep}
+                  coords={hullCoords}
+                  color={fireTimestepLayerMap[step.timestep]}
+                  outlineWidth={2}
+                  outlineColor={fireTimestepMap[step.timestep]}
+                  zIndex={5 - step.timestep}
+                />
+              </View>
             );
           })}
         </NaverMapView>
