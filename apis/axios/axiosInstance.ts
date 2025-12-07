@@ -1,8 +1,9 @@
-import axios, { AxiosInstance } from 'axios';
+import axios from 'axios';
+import { getDeviceId } from '../../utils/devideId';
 
 const baseURL = process.env.EXPO_PUBLIC_BASE_URL;
 
-const axiosInstance: AxiosInstance = axios.create({
+const axiosInstance = axios.create({
   baseURL,
   headers: {
     Accept: '*/*',
@@ -10,8 +11,12 @@ const axiosInstance: AxiosInstance = axios.create({
   },
 });
 
-axiosInstance.interceptors.response.use(
-  response => response,
+axiosInstance.interceptors.request.use(
+  async config => {
+    const deviceId = await getDeviceId();
+    config.headers.Authorization = deviceId;
+    return config;
+  },
   async error => {
     if (error.response?.data?.message) {
       alert(error.response?.data?.message);
