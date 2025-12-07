@@ -16,13 +16,15 @@ import { evacuationRouteData, evacuationRouteData2 } from '../../../mock/evacuat
 import theme from '../../../styles/theme';
 import { coordsFire, coordsFirePredict } from '../../../mock/fireAreaData';
 import * as Location from 'expo-location';
-import useGetRoutes from '../../../apis/hooks/usePostRoutes';
+import usePostRoutes from '../../../apis/hooks/usePostRoutes';
 import { PostRoutesResponse } from '../../../apis/types/route';
+import { getBearing } from '../../../utils/mapUtil';
 
 const EvacuationRoute = () => {
   const router = useRouter();
   const mapRef = useRef<NaverMapViewRef>(null);
 
+  // TODO: 로컬 스토리지의 내지역으로 초기화
   const [myLocation, setMyLocation] = useState<Camera>({
     latitude: 37.505278,
     longitude: 126.954613,
@@ -31,7 +33,7 @@ const EvacuationRoute = () => {
   });
   const [route, setRoute] = useState<PostRoutesResponse | null>(null);
 
-  const postRoute = useGetRoutes();
+  const postRoute = usePostRoutes();
 
   const handleGoBack = () => {
     router.back();
@@ -39,38 +41,21 @@ const EvacuationRoute = () => {
 
   const setCurrentPosition = async () => {
     const position = await Location.getCurrentPositionAsync();
+    const startLat = position.coords.latitude;
+    const startLon = position.coords.longitude;
+    const bearing = getBearing(position, evacuationRouteData.at(-1) ?? position.coords);
 
-    const lat1 = position.coords.latitude;
-    const lon1 = position.coords.longitude;
-
-    const last = evacuationRouteData.at(-1) ?? { latitude: lat1, longitude: lon1 };
-    const lat2 = last.latitude;
-    const lon2 = last.longitude;
-
-    const y = Math.sin(lon2 - lon1) * Math.cos(lat2);
-    const x =
-      Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
-    let bearing = Math.atan2(y, x);
-    bearing = (bearing * 180) / Math.PI;
-    bearing = (bearing + 360) % 360;
     setMyLocation({
-      latitude: lat1,
-      longitude: lon1,
+      latitude: startLat,
+      longitude: startLon,
       zoom: 15,
       bearing: bearing,
     });
-  };
 
-  useEffect(() => {
-    mapRef.current?.setLocationTrackingMode('Face');
-    setCurrentPosition();
-  }, []);
-
-  useEffect(() => {
     postRoute.mutate(
       {
-        startLat: myLocation.latitude,
-        startLon: myLocation.longitude,
+        startLat: startLat,
+        startLon: startLon,
         endLat: 37.506038005044,
         endLon: 126.960421779226,
       },
@@ -80,7 +65,12 @@ const EvacuationRoute = () => {
         },
       },
     );
-  }, [myLocation]);
+  };
+
+  useEffect(() => {
+    mapRef.current?.setLocationTrackingMode('Face');
+    setCurrentPosition();
+  }, []);
 
   return (
     <GestureHandlerRootView>
