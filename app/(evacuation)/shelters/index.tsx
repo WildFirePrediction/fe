@@ -16,6 +16,8 @@ import { Button, MapButton } from '../../../components';
 import { shelterData } from '../../../mock/shelterData';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
+import { useDestination } from '../../../context/destinationContext';
+import { FullCoordWithName } from '../../../types/locationCoord';
 
 const sortOptions = ['거리순', '수용인원순'];
 
@@ -28,6 +30,8 @@ const Shelters = () => {
   const [sortModalOpen, setSortModalOpen] = useState(false);
   const bottomSheetPosition = useSharedValue<number>(0);
 
+  const { destination, setDestination } = useDestination();
+
   const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
     top: bottomSheetPosition.value - 80,
   }));
@@ -37,7 +41,8 @@ const Shelters = () => {
     setSortModalOpen(false);
   };
 
-  const handleEvacuationRoute = () => {
+  const handleEvacuationRoute = (shelter: FullCoordWithName) => {
+    setDestination(shelter);
     router.push(`/(evacuation)/routePreview/${slug}`);
   };
 
@@ -60,6 +65,11 @@ const Shelters = () => {
   };
 
   useEffect(() => {
+    (async () => {
+      const currentLocation = await Location.getCurrentPositionAsync();
+      // TODO: 백엔드로 대피소 정보 GET 요청
+      // TODO: 카메라 설정
+    })();
     if (shelterData.length > 0) {
       setCamera({ ...shelterData[0], zoom: 15 });
     }
@@ -88,7 +98,7 @@ const Shelters = () => {
                   requestedWidth: 40,
                 }}
                 image={require('../../../assets/pngs/shelterMarker.png')}
-                onTap={handleEvacuationRoute}
+                onTap={() => handleEvacuationRoute(shelter)}
               />
             ))}
           </NaverMapView>
@@ -148,7 +158,7 @@ const Shelters = () => {
                         ? [style.listItemContainer, style.listItemHightlightContainer]
                         : style.listItemContainer
                     }
-                    onPress={handleEvacuationRoute}
+                    onPress={() => handleEvacuationRoute(shelter)}
                   >
                     {index === 0 && sortType === '거리순' && (
                       <Text style={style.listItemHighlightText}>가장 가까운 대피소</Text>

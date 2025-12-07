@@ -12,26 +12,22 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CancelIcon, WarningIcon } from '../../../assets/svgs/icons';
 import { useEffect, useRef, useState } from 'react';
-import { evacuationRouteData, evacuationRouteData2 } from '../../../mock/evacuationRouteData';
 import theme from '../../../styles/theme';
 import { coordsFire, coordsFirePredict } from '../../../mock/fireAreaData';
 import * as Location from 'expo-location';
 import usePostRoutes from '../../../apis/hooks/usePostRoutes';
-import { PostRoutesResponse } from '../../../apis/types/route';
 import { getBearing } from '../../../utils/mapUtil';
+import { FullCoord } from '../../../types/locationCoord';
+import { useDestination } from '../../../context/destinationContext';
 
 const EvacuationRoute = () => {
   const router = useRouter();
   const mapRef = useRef<NaverMapViewRef>(null);
+  const { destination } = useDestination();
 
   // TODO: 로컬 스토리지의 내지역으로 초기화
-  const [myLocation, setMyLocation] = useState<Camera>({
-    latitude: 37.505278,
-    longitude: 126.954613,
-    zoom: 15,
-    bearing: 0,
-  });
-  const [route, setRoute] = useState<PostRoutesResponse | null>(null);
+  const [myLocation, setMyLocation] = useState<Camera | undefined>();
+  const [route, setRoute] = useState<FullCoord[] | null>(null);
 
   const postRoute = usePostRoutes();
 
@@ -40,10 +36,12 @@ const EvacuationRoute = () => {
   };
 
   const setCurrentPosition = async () => {
+    if (!destination) return;
+
     const position = await Location.getCurrentPositionAsync();
     const startLat = position.coords.latitude;
     const startLon = position.coords.longitude;
-    const bearing = getBearing(position, evacuationRouteData.at(-1) ?? position.coords);
+    const bearing = getBearing(position, destination);
 
     setMyLocation({
       latitude: startLat,
@@ -56,12 +54,18 @@ const EvacuationRoute = () => {
       {
         startLat: startLat,
         startLon: startLon,
-        endLat: 37.506038005044,
-        endLon: 126.960421779226,
+        endLat: destination.latitude,
+        endLon: destination.longitude,
       },
       {
         onSuccess: response => {
-          if (response.result) setRoute(response.result);
+          if (response.result)
+            setRoute(
+              response.result.path.map(coord => ({
+                latitude: coord[1],
+                longitude: coord[0],
+              })),
+            );
         },
       },
     );
@@ -71,6 +75,10 @@ const EvacuationRoute = () => {
     mapRef.current?.setLocationTrackingMode('Face');
     setCurrentPosition();
   }, []);
+
+  useEffect(() => {
+    setCurrentPosition();
+  }, [destination]);
 
   return (
     <GestureHandlerRootView>
@@ -98,27 +106,26 @@ const EvacuationRoute = () => {
             />
             {route && (
               <NaverMapPathOverlay
-                coords={route.path.map(coord => ({
-                  latitude: coord[1],
-                  longitude: coord[0],
-                }))}
+                coords={route}
                 width={12}
                 color={theme.color.rain}
                 outlineWidth={2}
                 outlineColor={theme.color.white}
               />
             )}
-            <NaverMapMarkerOverlay
-              latitude={myLocation.latitude}
-              longitude={myLocation.longitude}
-              image={require('../../../assets/pngs/departureMarker.png')}
-            />
-            {evacuationRouteData.at(-1) !== undefined && (
+            {myLocation && (
               <NaverMapMarkerOverlay
-                latitude={evacuationRouteData.at(-1)?.latitude ?? myLocation.latitude}
-                longitude={evacuationRouteData.at(-1)?.longitude ?? myLocation.longitude}
+                latitude={myLocation.latitude}
+                longitude={myLocation.longitude}
+                image={require('../../../assets/pngs/departureMarker.png')}
+              />
+            )}
+            {destination && (
+              <NaverMapMarkerOverlay
+                latitude={destination.latitude}
+                longitude={destination.longitude}
                 caption={{
-                  text: '중앙대학교병원중앙관 지하주차장 1~3층 대피소',
+                  text: destination.name,
                   requestedWidth: 30,
                 }}
                 image={require('../../../assets/pngs/arriveMarker.png')}
