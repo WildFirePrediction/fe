@@ -9,6 +9,7 @@ const theme = {
     point: '#00317B',
     darkGray1: '#919191',
     darkGray2: '#6E6E6E',
+    darkGray3: '#2E2E2E',
     gray: '#D9D9D9',
     lightGray1: '#F3F3F3',
     lightGray2: '#EEEDED',
