@@ -247,6 +247,7 @@ const style = StyleSheet.create({
   listItemNameText: {
     fontSize: 17,
     width: 300,
+    fontWeight: '500',
   },
   listItemAdressText: {
     fontSize: 15,
@@ -255,6 +256,7 @@ const style = StyleSheet.create({
   listItemTimeText: {
     fontSize: 17,
     color: theme.color.rain,
+    fontWeight: '400',
   },
   listItemPeopleContainer: {
     flexDirection: 'row',

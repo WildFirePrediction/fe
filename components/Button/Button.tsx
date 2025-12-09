@@ -136,6 +136,7 @@ const style = StyleSheet.create({
   fullButtonTextStyle: {
     fontSize: 16,
     color: theme.color.white,
+    fontWeight: 'bold',
   },
   fullButtonWhiteStyle: {
     backgroundColor: theme.color.white,
@@ -143,7 +144,7 @@ const style = StyleSheet.create({
     borderColor: theme.color.gray,
   },
   fullButtonWhiteTextStyle: {
-    color: theme.color.black,
+    color: theme.color.darkGray2,
   },
   floatingButtonContainer: {
     shadowColor: theme.color.black,
