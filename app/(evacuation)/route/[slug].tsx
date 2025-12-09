@@ -25,9 +25,11 @@ const EvacuationRoute = () => {
   const mapRef = useRef<NaverMapViewRef>(null);
   const { destination } = useDestination();
 
-  // TODO: 로컬 스토리지의 내지역으로 초기화
   const [myLocation, setMyLocation] = useState<Camera | undefined>();
   const [route, setRoute] = useState<FullCoord[] | null>(null);
+  const [prevRoute, setPrevRoute] = useState<FullCoord[] | null>(null);
+  const myLocationRef = useRef<Camera | undefined>(undefined);
+  const routeRef = useRef<FullCoord[]>(null);
 
   const postRoute = usePostRoutes();
 
@@ -42,7 +44,6 @@ const EvacuationRoute = () => {
     const startLat = position.coords.latitude;
     const startLon = position.coords.longitude;
     const bearing = getBearing(position, destination);
-
     setMyLocation({
       latitude: startLat,
       longitude: startLon,
@@ -73,11 +74,56 @@ const EvacuationRoute = () => {
 
   useEffect(() => {
     mapRef.current?.setLocationTrackingMode('Face');
+
+    // 테스트용 코드 (경로 변경 상황)
+    const timer = setTimeout(() => {
+      if (myLocationRef.current) {
+        postRoute.mutate(
+          {
+            startLat: myLocationRef.current.latitude,
+            startLon: myLocationRef.current.longitude,
+            endLat: 37.506038005044,
+            endLon: 126.960421779226,
+          },
+          {
+            onSuccess: response => {
+              if (response.result) {
+                setPrevRoute(routeRef.current);
+                setRoute(
+                  response.result.path.map(coord => ({
+                    latitude: coord[1],
+                    longitude: coord[0],
+                  })),
+                );
+              }
+            },
+          },
+        );
+      }
+    }, 5000);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     setCurrentPosition();
   }, [destination]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (prevRoute) {
+        setPrevRoute(null);
+      }
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [prevRoute]);
+
+  useEffect(() => {
+    myLocationRef.current = myLocation;
+  }, [myLocation]);
+
+  useEffect(() => {
+    routeRef.current = route;
+  }, [route]);
 
   return (
     <GestureHandlerRootView>
@@ -103,6 +149,17 @@ const EvacuationRoute = () => {
               outlineColor={theme.color.main}
               outlineWidth={1}
             />
+
+            {prevRoute && (
+              <NaverMapPathOverlay
+                coords={prevRoute}
+                width={12}
+                color={theme.color.rainBackground}
+                outlineWidth={2}
+                outlineColor={theme.color.white}
+                zIndex={1}
+              />
+            )}
             {route && (
               <NaverMapPathOverlay
                 coords={route}
@@ -110,6 +167,7 @@ const EvacuationRoute = () => {
                 color={theme.color.rain}
                 outlineWidth={2}
                 outlineColor={theme.color.white}
+                zIndex={10}
               />
             )}
             {myLocation && (
@@ -199,4 +257,5 @@ const style = StyleSheet.create({
     fontSize: 13,
     color: theme.color.darkGray1,
   },
+  prevRouteView: {},
 });

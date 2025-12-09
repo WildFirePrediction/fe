@@ -31,6 +31,7 @@ const theme = {
     fireLayer3: '#FF6F434D',
     fireLayer4: '#FF98432D',
     fireLayer5: '#FF9E432D',
+    rainBackground: '#aecfffff',
   },
 };
 export default theme;
