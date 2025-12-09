@@ -2,7 +2,6 @@ import {
   Camera,
   NaverMapMarkerOverlay,
   NaverMapPathOverlay,
-  NaverMapPolygonOverlay,
   NaverMapView,
   NaverMapViewRef,
 } from '@mj-studio/react-native-naver-map';
@@ -11,15 +10,15 @@ import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CancelIcon } from '../../../assets/svgs/icons';
-import { Button } from '../../../components';
+import { Button, FireAreaOverlay } from '../../../components';
 import { useEffect, useRef, useState } from 'react';
 import theme from '../../../styles/theme';
-import { coordsFire, coordsFirePredict } from '../../../mock/fireAreaData';
 import * as Location from 'expo-location';
 import { getBearing } from '../../../utils/mapUtil';
 import usePostRoutes from '../../../apis/hooks/usePostRoutes';
 import { FullCoord } from '../../../types/locationCoord';
 import { useDestination } from '../../../context/destinationContext';
+import { firePredictionData } from '../../../mock/firePredictionData';
 
 const EvacuationRoutePreview = () => {
   const router = useRouter();
@@ -97,18 +96,7 @@ const EvacuationRoutePreview = () => {
             isShowLocationButton={false}
             locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
           >
-            <NaverMapPolygonOverlay
-              coords={coordsFire}
-              color={theme.color.mainTransparent}
-              outlineColor={theme.color.main}
-              outlineWidth={1}
-            />
-            <NaverMapPolygonOverlay
-              coords={coordsFirePredict}
-              color={theme.color.mainTransparent}
-              outlineColor={theme.color.main}
-              outlineWidth={1}
-            />
+            <FireAreaOverlay firePredictionData={firePredictionData} />
             {route && (
               <NaverMapPathOverlay
                 coords={route}

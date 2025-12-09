@@ -3,34 +3,16 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Button, MapButton, SelectionButton } from '../../components';
+import { Button, FireAreaOverlay, MapButton, SelectionButton } from '../../components';
 import * as Location from 'expo-location';
-import {
-  Camera,
-  NaverMapMarkerOverlay,
-  NaverMapPolygonOverlay,
-  NaverMapView,
-  NaverMapViewRef,
-} from '@mj-studio/react-native-naver-map';
+import { Camera, NaverMapView, NaverMapViewRef } from '@mj-studio/react-native-naver-map';
 import theme from '../../styles/theme';
-import {
-  AlertBellIcon,
-  BubbleTail,
-  DownArrowIcon,
-  RainIcon,
-  TimeStepMarker,
-} from '../../assets/svgs/icons';
+import { AlertBellIcon, BubbleTail, DownArrowIcon, RainIcon } from '../../assets/svgs/icons';
 import { myRegionData } from '../../mock/myRegionsData';
 import { useRouter } from 'expo-router';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { disasterTextData } from '../../mock/disasterTextData';
 import { firePredictionData } from '../../mock/firePredictionData';
-import { fireTimestepLayerMap, fireTimestepMap } from '../../constants/categories';
-import {
-  coordsToFullCoords,
-  buildPolygonForStep,
-  buildSquarePolygonForCell,
-} from '../../utils/mapUtil';
 import { getStorageItem } from '../../utils/storageUtil';
 import { ASYNC_STORAGE_KEYS } from '../../constants/storageKey';
 
@@ -130,52 +112,7 @@ const WildFireMapScreen = () => {
           isShowLocationButton={false}
           locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
         >
-          {firePredictionData.predictions.map(step => {
-            return (
-              <View key={step.timestep}>
-                {step.predicted_cells.map((cell, idx) => {
-                  const coords = buildSquarePolygonForCell(cell);
-                  return (
-                    <NaverMapPolygonOverlay
-                      key={`${step.timestep}-${idx}`}
-                      coords={coords}
-                      color={fireTimestepLayerMap[step.timestep]}
-                    />
-                  );
-                })}
-              </View>
-            );
-          })}
-          {firePredictionData.predictions.map(step => {
-            const center = {
-              latitude: firePredictionData.fire_location.lat,
-              longitude: firePredictionData.fire_location.lon,
-            };
-            const points = coordsToFullCoords(step.predicted_cells);
-            if (points.length === 0) return null;
-
-            const hullCoords = buildPolygonForStep(step, center.latitude, center.longitude);
-            return (
-              <View key={`${step.timestep}`}>
-                <NaverMapMarkerOverlay
-                  key={`${step.timestep}-marker`}
-                  latitude={hullCoords[0].latitude}
-                  longitude={hullCoords[0].longitude}
-                  caption={{ text: `${step.timestep * 10}분 후` }}
-                >
-                  <TimeStepMarker />
-                </NaverMapMarkerOverlay>
-                <NaverMapPolygonOverlay
-                  key={step.timestep}
-                  coords={hullCoords}
-                  color={fireTimestepLayerMap[step.timestep]}
-                  outlineWidth={2}
-                  outlineColor={fireTimestepMap[step.timestep]}
-                  zIndex={5 - step.timestep}
-                />
-              </View>
-            );
-          })}
+          <FireAreaOverlay firePredictionData={firePredictionData} />
         </NaverMapView>
         {isFireOccur && (
           <View style={style.alertPopup}>
