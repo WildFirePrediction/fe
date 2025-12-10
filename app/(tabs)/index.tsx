@@ -3,14 +3,9 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Button, MapButton, SelectionButton } from '../../components';
+import { Button, FireAreaOverlay, MapButton, SelectionButton } from '../../components';
 import * as Location from 'expo-location';
-import {
-  Camera,
-  NaverMapPolygonOverlay,
-  NaverMapView,
-  NaverMapViewRef,
-} from '@mj-studio/react-native-naver-map';
+import { Camera, NaverMapView, NaverMapViewRef } from '@mj-studio/react-native-naver-map';
 import theme from '../../styles/theme';
 import { AlertBellIcon, BubbleTail, DownArrowIcon, RainIcon } from '../../assets/svgs/icons';
 import { myRegionData } from '../../mock/myRegionsData';
@@ -18,9 +13,6 @@ import { useRouter } from 'expo-router';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { disasterTextData } from '../../mock/disasterTextData';
 import { firePredictionData } from '../../mock/firePredictionData';
-import { fireTimestepLayerMap, fireTimestepMap } from '../../constants/categories';
-import { FullCoord } from '../../types/locationCoord';
-import { makeConvexHullLatLng, createCirclePolygon, coordsToFullCoords } from '../../utils/mapUtil';
 import { getStorageItem } from '../../utils/storageUtil';
 import { ASYNC_STORAGE_KEYS } from '../../constants/storageKey';
 
@@ -36,7 +28,7 @@ const WildFireMapScreen = () => {
   const bottomSheetPosition = useSharedValue<number>(0);
 
   const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
-    top: bottomSheetPosition.value - 150,
+    top: bottomSheetPosition.value - (isFireOccur ? 190 : 70),
   }));
 
   const handleSelectRegion = (regionName: string) => {
@@ -73,6 +65,14 @@ const WildFireMapScreen = () => {
     } catch (error) {
       console.error('Cannot get location information:', error);
     }
+  };
+
+  const moveToFire = () => {
+    mapRef.current?.animateCameraTo({
+      latitude: firePredictionData.fire_location.lat,
+      longitude: firePredictionData.fire_location.lon,
+      zoom: 13.5,
+    });
   };
 
   useEffect(() => {
@@ -112,51 +112,7 @@ const WildFireMapScreen = () => {
           isShowLocationButton={false}
           locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
         >
-          {firePredictionData.predictions.map(step => {
-            const fillColor = fireTimestepMap[step.timestep];
-            return (
-              <View key={step.timestep}>
-                {step.predicted_cells.map((cell, idx) => {
-                  const cellCenter: FullCoord = {
-                    latitude: cell.lat,
-                    longitude: cell.lon,
-                  };
-                  const CELL_RADIUS_M = 35;
-                  const coords = createCirclePolygon(cellCenter, CELL_RADIUS_M, 32);
-                  return (
-                    <NaverMapPolygonOverlay
-                      key={`${step.timestep}-${idx}`}
-                      coords={coords}
-                      color={fireTimestepLayerMap[step.timestep]}
-                      outlineWidth={1}
-                      outlineColor={fillColor}
-                    />
-                  );
-                })}
-              </View>
-            );
-          })}
-          {firePredictionData.predictions.map(step => {
-            const center = {
-              latitude: firePredictionData.fire_location.lat,
-              longitude: firePredictionData.fire_location.lon,
-            };
-            const points = coordsToFullCoords(step.predicted_cells);
-
-            if (points.length === 0) return null;
-
-            const hullCoords = makeConvexHullLatLng(points, center.latitude);
-            return (
-              <NaverMapPolygonOverlay
-                key={step.timestep}
-                coords={hullCoords}
-                color={fireTimestepLayerMap[step.timestep]}
-                outlineWidth={1}
-                outlineColor={fireTimestepMap[step.timestep]}
-                zIndex={5 - step.timestep}
-              />
-            );
-          })}
+          <FireAreaOverlay firePredictionData={firePredictionData} />
         </NaverMapView>
         {isFireOccur && (
           <View style={style.alertPopup}>
@@ -165,6 +121,9 @@ const WildFireMapScreen = () => {
           </View>
         )}
         <Animated.View style={[style.floatingButtonsContainer, floatingButtonsAnimatedStyle]}>
+          {isFireOccur && (
+            <MapButton type="fire" customStyle={style.fireMapButton} onClick={moveToFire} />
+          )}
           <MapButton onClick={moveToCurrentLocation} />
           {isFireOccur && (
             <View style={style.navigationButtonContainer}>
@@ -431,6 +390,9 @@ const style = StyleSheet.create({
     alignSelf: 'flex-end',
     alignItems: 'flex-end',
   },
+  fireMapButton: {
+    marginBottom: 10,
+  },
   navigationButtonContainer: {
     marginTop: -20,
     alignItems: 'flex-end',
@@ -486,5 +448,6 @@ const style = StyleSheet.create({
   popupBubbleTail: {
     marginTop: -7,
     marginEnd: 20,
+    color: theme.color.darkGray2,
   },
 });

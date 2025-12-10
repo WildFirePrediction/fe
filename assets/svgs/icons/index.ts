@@ -23,6 +23,9 @@ import MyPage from './MyPage.svg';
 import BubbleTail from './BubbleTail.svg';
 import AlertBell from './AlertBell.svg';
 import DownArrow from './DownArrow.svg';
+import TimeStepMarker from './TimeStepMarker.svg';
+import Flame from './Flame.svg';
+import BubbleTailBorder from './BubbleTailBorder.svg';
 
 export { NavigationArrow };
 export { Setting as SettingIcon };
@@ -49,3 +52,6 @@ export { MyPage as MyPageIcon };
 export { BubbleTail };
 export { AlertBell as AlertBellIcon };
 export { DownArrow as DownArrowIcon };
+export { TimeStepMarker };
+export { Flame as FlameIcon };
+export { BubbleTailBorder };

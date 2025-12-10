@@ -1,20 +1,25 @@
 import React from 'react';
 import { StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import theme from '../../styles/theme';
-import { LocationIcon } from '../../assets/svgs/icons';
+import { FlameIcon, LocationIcon } from '../../assets/svgs/icons';
 
 interface MapButtonProps {
+  type?: 'location' | 'fire';
   onClick: () => void;
   customStyle?: StyleProp<ViewStyle>;
 }
-const MapButton: React.FC<MapButtonProps> = ({ onClick, customStyle }: MapButtonProps) => {
+const MapButton: React.FC<MapButtonProps> = ({
+  type = 'location',
+  onClick,
+  customStyle,
+}: MapButtonProps) => {
   return (
     <TouchableOpacity
       style={[style.buttonStyle, customStyle]}
       onPress={onClick}
-      activeOpacity={0.5}
+      activeOpacity={0.7}
     >
-      <LocationIcon width={29} height={29} />
+      {type === 'location' ? <LocationIcon width={29} height={29} /> : <FlameIcon />}
     </TouchableOpacity>
   );
 };

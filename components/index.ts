@@ -1,7 +1,7 @@
 import SelectionButton from './Button/SelectionButton';
 import Button from './Button/Button';
 import MapButton from './Button/MapButton';
+import FireAreaOverlay from './FireAreaOverlay';
+import Bubble from './Bubble';
 
-export { SelectionButton };
-export { Button };
-export { MapButton };
+export { SelectionButton, Button, MapButton, FireAreaOverlay, Bubble };
