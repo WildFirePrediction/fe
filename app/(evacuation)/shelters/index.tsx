@@ -136,10 +136,13 @@ const Shelters = () => {
                   longitude={shelter.longitude}
                   caption={{
                     text: shelter.facilityName,
-                    requestedWidth: 40,
+                    requestedWidth: 20,
+                    haloColor: theme.color.white,
+                    textSize: 11,
                   }}
                   image={require('../../../assets/pngs/shelterMarker.png')}
                   onTap={() => handleEvacuationRoute(shelter)}
+                  isHideCollidedCaptions={true}
                 />
               ))}
           </NaverMapView>

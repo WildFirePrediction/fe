@@ -8,6 +8,7 @@ import {
   coordsToFullCoords,
 } from '../utils/mapUtil';
 import { fireTimestepLayerMap, fireTimestepMap } from '../constants/categories';
+import theme from '../styles/theme';
 
 type Props = {
   firePredictionData: FirePredictionResponse;
@@ -49,7 +50,8 @@ const FirePredictionOverlays: React.FC<Props> = ({ firePredictionData }) => {
               key={`${step.timestep}-marker`}
               latitude={hullCoords[0].latitude}
               longitude={hullCoords[0].longitude}
-              caption={{ text: `${step.timestep * 10}분 후` }}
+              caption={{ text: `${step.timestep * 10}분 후`, haloColor: theme.color.white }}
+              isHideCollidedCaptions={true}
             >
               <TimeStepMarker />
             </NaverMapMarkerOverlay>
