@@ -12,9 +12,9 @@ import { myRegionData } from '../../mock/myRegionsData';
 import { useRouter } from 'expo-router';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { disasterTextData } from '../../mock/disasterTextData';
-import { firePredictionData } from '../../mock/firePredictionData';
 import { getStorageItem } from '../../utils/storageUtil';
 import { ASYNC_STORAGE_KEYS } from '../../constants/storageKey';
+import { useFirePrediction } from '../../context/firePredictionContext';
 
 const WildFireMapScreen = () => {
   const router = useRouter();
@@ -24,12 +24,14 @@ const WildFireMapScreen = () => {
   const [camera, setCamera] = useState<Camera | undefined>(myRegionData.at(0));
   const [isWeatherReportOpen, setIsWeatherReportOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState<Record<number, boolean>>({});
-  const [isFireOccur, setIsFireOccur] = useState(true);
+  const [isFireOccur, setIsFireOccur] = useState(false);
   const bottomSheetPosition = useSharedValue<number>(0);
 
   const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
     top: bottomSheetPosition.value - (isFireOccur ? 190 : 70),
   }));
+
+  const { firePredictionDatas } = useFirePrediction();
 
   const handleSelectRegion = (regionName: string) => {
     const region = myRegionData.find(myRegion => myRegion.name === regionName);
@@ -68,11 +70,13 @@ const WildFireMapScreen = () => {
   };
 
   const moveToFire = () => {
-    mapRef.current?.animateCameraTo({
-      latitude: firePredictionData.fire_location.lat,
-      longitude: firePredictionData.fire_location.lon,
-      zoom: 13.5,
-    });
+    if (firePredictionDatas.length > 0) {
+      mapRef.current?.animateCameraTo({
+        latitude: firePredictionDatas[0].fire_location.lat,
+        longitude: firePredictionDatas[0].fire_location.lon,
+        zoom: 13.5,
+      });
+    }
   };
 
   useEffect(() => {
@@ -101,6 +105,12 @@ const WildFireMapScreen = () => {
     setIsMessageOpen(Object.fromEntries(disasterTextData.map(item => [item.id, false])));
   }, [disasterTextData]);
 
+  useEffect(() => {
+    if (firePredictionDatas.length > 0) {
+      setIsFireOccur(true);
+    }
+  }, [firePredictionDatas]);
+
   return (
     <GestureHandlerRootView>
       <SafeAreaView style={style.container}>
@@ -112,7 +122,7 @@ const WildFireMapScreen = () => {
           isShowLocationButton={false}
           locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
         >
-          <FireAreaOverlay firePredictionData={firePredictionData} />
+          <FireAreaOverlay />
         </NaverMapView>
         {isFireOccur && (
           <View style={style.alertPopup}>

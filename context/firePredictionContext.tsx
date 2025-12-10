@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import EventSource from 'react-native-sse';
 import { FireEndResponse, FirePredictionResponse } from '../apis/types/fire';
+import { firePredictionData } from '../mock/firePredictionData';
 
 const FIRE_PREDICTION_SSE_BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 interface FirePredictionContextValue {
   firePredictionDatas: FirePredictionResponse[];
-  fireEndDatas: string[];
   isConnected: boolean;
   error: Error | null;
 }
@@ -18,7 +18,8 @@ type FirePredictionProviderProps = {
 
 export const FirePredictionProvider: React.FC<FirePredictionProviderProps> = ({ children }) => {
   const [firePredictionDatas, setFirePredictionDatas] = useState<FirePredictionResponse[]>([]);
-  const [fireEndDatas, setFireEndDatas] = useState<string[]>([]);
+  // const [firePredictionDatas, setFirePredictionDatas] =
+  //   useState<FirePredictionResponse[]>(firePredictionData);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -43,7 +44,6 @@ export const FirePredictionProvider: React.FC<FirePredictionProviderProps> = ({ 
       if (isUnmounted) return;
       if (!event.data) return;
       console.log(`[SSE] fire_prediction data: ${event.data}`);
-
       try {
         const newData: FirePredictionResponse = JSON.parse(event.data);
 
@@ -63,10 +63,12 @@ export const FirePredictionProvider: React.FC<FirePredictionProviderProps> = ({ 
       if (isUnmounted) return;
       if (!event.data) return;
       console.log(`[SSE] end data: ${event.data}`);
-
       try {
         const endData: FireEndResponse = JSON.parse(event.data);
-        setFireEndDatas(prev => [...prev, endData.fire_id]);
+        setFirePredictionDatas(prev => {
+          if (!prev) return prev;
+          return prev.filter(item => item.fire_id !== endData.fire_id);
+        });
       } catch (e) {
         console.log('[SSE] parse error', e);
         setError(e instanceof Error ? e : new Error('Failed to parse SSE message'));
@@ -92,11 +94,10 @@ export const FirePredictionProvider: React.FC<FirePredictionProviderProps> = ({ 
   const value = useMemo(
     () => ({
       firePredictionDatas,
-      fireEndDatas,
       isConnected,
       error,
     }),
-    [firePredictionDatas, fireEndDatas, isConnected, error],
+    [firePredictionDatas, isConnected, error],
   );
 
   return <FirePredictionContext.Provider value={value}>{children}</FirePredictionContext.Provider>;

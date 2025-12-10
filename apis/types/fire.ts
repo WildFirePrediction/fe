@@ -17,3 +17,10 @@ export interface FirePredictionCell {
   lon: number;
   probability: number;
 }
+
+export interface FireEndResponse {
+  fire_id: string;
+  fire_location: LocationCoord;
+  ended_timestamp: string;
+  completion_timestamp: string;
+}
