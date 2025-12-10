@@ -14,11 +14,9 @@ import { Button, FireAreaOverlay } from '../../../components';
 import { useEffect, useRef, useState } from 'react';
 import theme from '../../../styles/theme';
 import * as Location from 'expo-location';
-import { getBearing } from '../../../utils/mapUtil';
 import usePostRoutes from '../../../apis/hooks/usePostRoutes';
 import { FullCoord } from '../../../types/locationCoord';
 import { useDestination } from '../../../context/destinationContext';
-import { firePredictionData } from '../../../mock/firePredictionData';
 
 const EvacuationRoutePreview = () => {
   const router = useRouter();
@@ -49,12 +47,10 @@ const EvacuationRoutePreview = () => {
 
     const startLat = position.coords.latitude;
     const startLon = position.coords.longitude;
-    const bearing = getBearing(position, destination);
     setStartLocation({
       latitude: startLat,
       longitude: startLon,
       zoom: 15,
-      bearing: bearing,
     });
 
     postRoute.mutate(
