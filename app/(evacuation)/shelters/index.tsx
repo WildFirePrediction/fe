@@ -87,12 +87,7 @@ const Shelters = () => {
   useEffect(() => {
     // shelters 데이터 set
     if (sheltersResponsePages !== undefined) {
-      const resultShelters: ShelterData[] = [];
-      sheltersResponsePages.forEach(page => {
-        if (page !== undefined) {
-          page.shelters.forEach(shelter => resultShelters.push(shelter));
-        }
-      });
+      const resultShelters = sheltersResponsePages.flatMap(page => page?.shelters ?? []);
       setShelters(resultShelters);
       if (resultShelters.length > 0) {
         setCamera({

@@ -5,7 +5,7 @@ export interface GetShelterNearbyParams {
   size: number;
 }
 
-export interface GetShelterNearbyResposne {
+export interface GetShelterNearbyResponse {
   shelters: ShelterData[];
   radiusKm: number;
   page: number;

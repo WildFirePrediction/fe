@@ -14,7 +14,7 @@ type Props = {
   firePredictionData: FirePredictionResponse;
 };
 
-const FirePredictionOverlays: React.FC<Props> = ({ firePredictionData }) => {
+const FireAreaOvarlay: React.FC<Props> = ({ firePredictionData }) => {
   if (!firePredictionData || !firePredictionData.predictions?.length) return null;
 
   return (
@@ -71,4 +71,4 @@ const FirePredictionOverlays: React.FC<Props> = ({ firePredictionData }) => {
   );
 };
 
-export default memo(FirePredictionOverlays);
+export default memo(FireAreaOvarlay);
