@@ -198,7 +198,7 @@ const EvacuationRoute = () => {
                 latitude={destination.latitude}
                 longitude={destination.longitude}
                 caption={{
-                  text: destination.name,
+                  text: destination.facilityName,
                   requestedWidth: 30,
                 }}
                 image={require('../../../assets/pngs/arriveMarker.png')}

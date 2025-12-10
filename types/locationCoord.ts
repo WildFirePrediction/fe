@@ -9,5 +9,5 @@ export type FullCoord = {
 };
 
 export type FullCoordWithName = FullCoord & {
-  name: string;
+  facilityName: string;
 };

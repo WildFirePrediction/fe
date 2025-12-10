@@ -10,14 +10,15 @@ import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'reac
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CancelIcon, PeopleIcon, SortArrowDownIcon } from '../../../assets/svgs/icons';
+import { CancelIcon, SortArrowDownIcon } from '../../../assets/svgs/icons';
 import theme from '../../../styles/theme';
 import { Button, MapButton } from '../../../components';
-import { shelterData } from '../../../mock/shelterData';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { useDestination } from '../../../context/destinationContext';
-import { FullCoordWithName } from '../../../types/locationCoord';
+import { FullCoord, FullCoordWithName } from '../../../types/locationCoord';
+import useGetSheltersNearby from '../../../apis/hooks/useGetSheltersNearby';
+import { ShelterData } from '../../../apis/types/shelter';
 
 const sortOptions = ['거리순', '수용인원순'];
 
@@ -29,8 +30,15 @@ const Shelters = () => {
   const [camera, setCamera] = useState<Camera>();
   const [sortModalOpen, setSortModalOpen] = useState(false);
   const bottomSheetPosition = useSharedValue<number>(0);
+  const [myLocation, setMyLocation] = useState<FullCoord | undefined>(undefined);
 
-  const { destination, setDestination } = useDestination();
+  const { setDestination } = useDestination();
+  const {
+    data: sheltersResponsePages,
+    fetchNextPage,
+    hasNextPage: hasMoreShelters,
+  } = useGetSheltersNearby(myLocation?.latitude, myLocation?.longitude);
+  const [shelters, setShelters] = useState<ShelterData[] | null>(null);
 
   const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
     top: bottomSheetPosition.value - 80,
@@ -46,14 +54,25 @@ const Shelters = () => {
     router.push(`/(evacuation)/routePreview/${slug}`);
   };
 
+  const handleShowShelterMap = (shelter: FullCoordWithName) => {
+    mapRef.current?.animateCameraTo({
+      latitude: shelter.latitude,
+      longitude: shelter.longitude,
+      zoom: 15,
+    });
+  };
+
   const handleShelterInfo = () => {
     router.push(`/(evacuation)/shelters/${slug}`);
+  };
+
+  const handleMoreSearch = () => {
+    if (hasMoreShelters) fetchNextPage();
   };
 
   const moveToCurrentLocation = async () => {
     try {
       const position = await Location.getCurrentPositionAsync();
-
       mapRef.current?.animateCameraTo({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
@@ -65,15 +84,34 @@ const Shelters = () => {
   };
 
   useEffect(() => {
+    // shelters 데이터 set
+    if (sheltersResponsePages !== undefined) {
+      const resultShelters: ShelterData[] = [];
+      sheltersResponsePages.forEach(page => {
+        if (page !== undefined) {
+          page.shelters.forEach(shelter => resultShelters.push(shelter));
+        }
+      });
+      setShelters(resultShelters);
+      if (resultShelters.length > 0) {
+        setCamera({
+          ...resultShelters[0],
+          zoom: 14,
+        });
+      }
+    }
+  }, [sheltersResponsePages]);
+
+  useEffect(() => {
+    mapRef.current?.setLocationTrackingMode('NoFollow');
+    // 내위치 설정-> GET api 호출
     (async () => {
       const currentLocation = await Location.getCurrentPositionAsync();
-      // TODO: 백엔드로 대피소 정보 GET 요청
-      // TODO: 카메라 설정
+      setMyLocation({
+        latitude: currentLocation.coords.latitude,
+        longitude: currentLocation.coords.longitude,
+      });
     })();
-    if (shelterData.length > 0) {
-      setCamera({ ...shelterData[0], zoom: 15 });
-    }
-    mapRef.current?.setLocationTrackingMode('NoFollow');
   }, []);
 
   return (
@@ -88,22 +126,31 @@ const Shelters = () => {
             isShowCompass={false}
             locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
           >
-            {shelterData.map((shelter, index) => (
-              <NaverMapMarkerOverlay
-                key={`${shelter.name}-${index}`}
-                latitude={shelter.latitude}
-                longitude={shelter.longitude}
-                caption={{
-                  text: shelter.name,
-                  requestedWidth: 40,
-                }}
-                image={require('../../../assets/pngs/shelterMarker.png')}
-                onTap={() => handleEvacuationRoute(shelter)}
-              />
-            ))}
+            {shelters &&
+              shelters.map((shelter, index) => (
+                <NaverMapMarkerOverlay
+                  key={`${shelter.facilityName}-${index}`}
+                  latitude={shelter.latitude}
+                  longitude={shelter.longitude}
+                  caption={{
+                    text: shelter.facilityName,
+                    requestedWidth: 40,
+                  }}
+                  image={require('../../../assets/pngs/shelterMarker.png')}
+                  onTap={() => handleEvacuationRoute(shelter)}
+                />
+              ))}
           </NaverMapView>
           <CancelIcon style={style.closeIcon} onPress={() => router.back()} />
-
+          {hasMoreShelters && (
+            <TouchableOpacity
+              style={style.moreSearchButton}
+              activeOpacity={0.7}
+              onPress={handleMoreSearch}
+            >
+              <Text style={style.moreSearchText}>대피소 더보기</Text>
+            </TouchableOpacity>
+          )}
           <Modal visible={sortModalOpen} transparent={true} animationType="fade">
             <Pressable style={style.modalBackground} onPress={() => setSortModalOpen(false)}>
               <View style={style.modalContainer}>
@@ -145,44 +192,59 @@ const Shelters = () => {
             animatedPosition={bottomSheetPosition}
           >
             <BottomSheetScrollView style={style.bottomSheetView}>
-              <Pressable style={style.sortContainer} onPress={() => setSortModalOpen(true)}>
-                <Text style={style.sortText}>{sortType}</Text>
-                <SortArrowDownIcon style={style.sortArrowIconStyle} />
-              </Pressable>
+              <View style={style.bottomSheetOptionContainer}>
+                <Pressable style={style.sortContainer} onPress={() => setSortModalOpen(true)}>
+                  <Text style={style.sortText}>{sortType}</Text>
+                  <SortArrowDownIcon style={style.sortArrowIconStyle} />
+                </Pressable>
+                <Text style={style.numberOfSheltersText}>주변 대피소 {shelters?.length}개</Text>
+              </View>
               <View style={style.bottomSheetListContainer}>
-                {shelterData.map((shelter, index) => (
-                  <Pressable
-                    key={`${shelter.name}-${index}`}
-                    style={
-                      index === 0 && sortType === '거리순'
-                        ? [style.listItemContainer, style.listItemHightlightContainer]
-                        : style.listItemContainer
-                    }
-                    onPress={() => handleEvacuationRoute(shelter)}
-                  >
-                    {index === 0 && sortType === '거리순' && (
-                      <Text style={style.listItemHighlightText}>가장 가까운 대피소</Text>
-                    )}
-                    <View style={style.listItemDetailContainer}>
-                      <View style={style.listItemTitleContainer}>
-                        <Text style={style.listItemNameText} lineBreakStrategyIOS="hangul-word">
-                          {shelter.name}
-                        </Text>
-                        <Text style={style.listItemAdressText}>{shelter.address}</Text>
+                {shelters &&
+                  shelters.map((shelter, index) => (
+                    <Pressable
+                      key={`${shelter.facilityName}-${index}`}
+                      style={
+                        index === 0 && sortType === '거리순'
+                          ? [style.listItemContainer, style.listItemHightlightContainer]
+                          : style.listItemContainer
+                      }
+                      onPress={() => handleShowShelterMap(shelter)}
+                    >
+                      {index === 0 && sortType === '거리순' && (
+                        <Text style={style.listItemHighlightText}>가장 가까운 대피소</Text>
+                      )}
+                      <View style={style.listItemMainContainer}>
+                        <View style={style.listItemTitleContainer}>
+                          <Text style={style.listItemNameText} lineBreakStrategyIOS="hangul-word">
+                            {shelter.facilityName}
+                          </Text>
+                          <Text style={style.listItemAdressText}>{shelter.roadAddress}</Text>
+                        </View>
+                        <Text style={style.listItemTimeText}>{shelter.distanceM}m</Text>
                       </View>
-                      <Text style={style.listItemTimeText}>{shelter.time}</Text>
-                    </View>
-                    <View style={style.listItemDetailContainer}>
-                      <View style={style.listItemPeopleContainer}>
-                        <PeopleIcon style={style.listItemPeopleIcon} />
-                        <Text style={style.listItemPeopleText}>{shelter.people}명</Text>
+                      <View style={style.listItemDetailContainer}>
+                        <Text style={style.listItemmTypeText}>{shelter.shelterTypeName}</Text>
+                        <View style={style.listItemButtonContainer}>
+                          <Button
+                            buttonType="action"
+                            colorStyle="white"
+                            onClick={handleShelterInfo}
+                            customStyle={{ alignSelf: 'auto' }}
+                          >
+                            대피소 정보
+                          </Button>
+                          <TouchableOpacity
+                            style={style.listItemStartButton}
+                            activeOpacity={0.5}
+                            onPress={() => handleEvacuationRoute(shelter)}
+                          >
+                            <Text style={style.listItemStartButtonText}>안내 시작</Text>
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                      <Button buttonType="action" colorStyle="white" onClick={handleShelterInfo}>
-                        대피소 정보
-                      </Button>
-                    </View>
-                  </Pressable>
-                ))}
+                    </Pressable>
+                  ))}
               </View>
             </BottomSheetScrollView>
           </BottomSheet>
@@ -213,6 +275,10 @@ const style = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
   },
+  bottomSheetOptionContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   sortContainer: {
     flexDirection: 'row',
     gap: 7,
@@ -226,6 +292,11 @@ const style = StyleSheet.create({
     color: theme.color.darkGray2,
     width: 13,
   },
+  numberOfSheltersText: {
+    fontSize: 16,
+    color: theme.color.darkGray1,
+    marginEnd: 20,
+  },
   bottomSheetListContainer: {
     gap: 10,
     marginTop: 13,
@@ -237,9 +308,14 @@ const style = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: theme.color.gray,
   },
+  listItemMainContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   listItemDetailContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-end',
   },
   listItemTitleContainer: {
     gap: 5,
@@ -256,7 +332,27 @@ const style = StyleSheet.create({
   listItemTimeText: {
     fontSize: 17,
     color: theme.color.rain,
-    fontWeight: '400',
+    fontWeight: '500',
+  },
+  listItemmTypeText: {
+    fontSize: 13,
+    color: theme.color.darkGray3,
+  },
+  listItemStartButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 10,
+    backgroundColor: theme.color.main,
+  },
+  listItemStartButtonText: {
+    color: theme.color.white,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  listItemButtonContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'flex-end',
   },
   listItemPeopleContainer: {
     flexDirection: 'row',
@@ -328,5 +424,24 @@ const style = StyleSheet.create({
     alignSelf: 'flex-end',
     alignItems: 'flex-end',
     gap: 20,
+  },
+  moreSearchButton: {
+    position: 'absolute',
+    marginTop: 40,
+    marginStart: 140,
+    marginEnd: 140,
+    paddingHorizontal: 20,
+    paddingVertical: 11,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: theme.color.gray,
+    backgroundColor: theme.color.white,
+    shadowColor: theme.color.black,
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  moreSearchText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
