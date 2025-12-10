@@ -448,5 +448,6 @@ const style = StyleSheet.create({
   popupBubbleTail: {
     marginTop: -7,
     marginEnd: 20,
+    color: theme.color.darkGray2,
   },
 });

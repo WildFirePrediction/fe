@@ -18,7 +18,7 @@ import { getBearing } from '../../../utils/mapUtil';
 import { FullCoord } from '../../../types/locationCoord';
 import { useDestination } from '../../../context/destinationContext';
 import { firePredictionData } from '../../../mock/firePredictionData';
-import { FireAreaOverlay } from '../../../components';
+import { Bubble, FireAreaOverlay } from '../../../components';
 import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -33,6 +33,7 @@ const EvacuationRoute = () => {
   const [distance, setDistance] = useState(0);
   const [time, setTime] = useState(0);
   const [showAlert, setShowAlert] = useState(false);
+  const [showRoutePopup, setShowRoutePopup] = useState(false);
 
   const myLocationRef = useRef<Camera | undefined>(undefined);
   const routeRef = useRef<FullCoord[]>(null);
@@ -99,6 +100,7 @@ const EvacuationRoute = () => {
             onSuccess: response => {
               if (response.result) {
                 setPrevRoute(routeRef.current);
+                setShowRoutePopup(true);
                 setRoute(
                   response.result.path.map(coord => ({
                     latitude: coord[1],
@@ -122,6 +124,7 @@ const EvacuationRoute = () => {
     const timer = setTimeout(() => {
       if (prevRoute) {
         setPrevRoute(null);
+        setShowRoutePopup(false);
       }
     }, 5000);
     return () => clearTimeout(timer);
@@ -203,6 +206,14 @@ const EvacuationRoute = () => {
                 }}
                 image={require('../../../assets/pngs/arriveMarker.png')}
               />
+            )}
+            {destination && route && showRoutePopup && (
+              <NaverMapMarkerOverlay
+                latitude={route.at(-20)!.latitude}
+                longitude={route.at(-20)!.longitude}
+              >
+                <Bubble text="새 경로" />
+              </NaverMapMarkerOverlay>
             )}
           </NaverMapView>
           <CancelIcon style={style.closeIcon} onPress={handleGoBack} />
