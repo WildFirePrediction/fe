@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import EventSource from 'react-native-sse';
 import { FireEndResponse, FirePredictionResponse } from '../apis/types/fire';
 import { firePredictionData } from '../mock/firePredictionData';
+import useGetFiresActivate from '../apis/hooks/useGetFiresActivate';
 
 const FIRE_PREDICTION_SSE_BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 interface FirePredictionContextValue {
@@ -22,6 +23,13 @@ export const FirePredictionProvider: React.FC<FirePredictionProviderProps> = ({ 
   //   useState<FirePredictionResponse[]>(firePredictionData);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  const { data: initialFirePredictaionDatas } = useGetFiresActivate();
+
+  useEffect(() => {
+    console.log(`initialFirePredictionDatas: ${initialFirePredictaionDatas}`);
+    if (initialFirePredictaionDatas) setFirePredictionDatas(initialFirePredictaionDatas);
+  }, [initialFirePredictaionDatas]);
 
   useEffect(() => {
     const url = `${FIRE_PREDICTION_SSE_BASE_URL}/fires/sse-stream`;
