@@ -17,7 +17,6 @@ import usePostRoutes from '../../../apis/hooks/usePostRoutes';
 import { getBearing } from '../../../utils/mapUtil';
 import { FullCoord } from '../../../types/locationCoord';
 import { useDestination } from '../../../context/destinationContext';
-import { firePredictionData } from '../../../mock/firePredictionData';
 import { Bubble, FireAreaOverlay } from '../../../components';
 import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';

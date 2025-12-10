@@ -24,8 +24,6 @@ const FireAreaOvarlay: React.FC = () => {
           step.predicted_cells.map((cell, idx) => {
             const coords = buildSquarePolygonForCell(cell);
             if (!coords || coords.length === 0) return null;
-            console.log(`square polygon: ${firePredictionData.fire_id} - ${step.timestep}`);
-
             return (
               <NaverMapPolygonOverlay
                 key={`cell-${firePredictionData.fire_id}-${step.timestep}-${idx}`}
