@@ -1,5 +1,6 @@
 import {
   Keyboard,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -11,18 +12,22 @@ import theme from '../styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { regionSearchData } from '../mock/regionSearchData';
+import useGetRegionSearch from '../apis/hooks/useGetRegionSearch';
+import usePostUserPreference from '../apis/hooks/usePostUserPreference';
 
 const RegionSearch = () => {
   const router = useRouter();
   const [keyword, setKeyword] = useState('');
 
+  const { data: searchData } = useGetRegionSearch(keyword);
+  const postRegion = usePostUserPreference();
+
   const handleInputChange = (text: string) => {
     setKeyword(text);
   };
 
-  const handlePressItem = (item: string) => {
-    // TODO: POST api 호출 로직 구현
+  const handlePressItem = (regionId: number) => {
+    postRegion.mutate([regionId]);
     router.back();
   };
 
@@ -41,13 +46,22 @@ const RegionSearch = () => {
             <Text style={style.searchCancelText}>취소</Text>
           </TouchableOpacity>
         </View>
-        <View style={style.searchResultContainer}>
-          {regionSearchData.map((region, index) => (
-            <TouchableOpacity key={`${region}-${index}`} onPress={() => handlePressItem(region)}>
-              <Text style={style.searchResultItem}>{region}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={style.searchResultContainer}>
+            {searchData &&
+              searchData.map((region, index) => (
+                <TouchableOpacity
+                  key={`${region}-${index}`}
+                  onPress={() => handlePressItem(region.id)}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={style.searchResultItem}
+                  >{`${region.sido} ${region.sigungu} ${region.eupmyeondong}`}</Text>
+                </TouchableOpacity>
+              ))}
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
@@ -81,11 +95,12 @@ const style = StyleSheet.create({
     color: theme.color.darkGray2,
   },
   searchResultContainer: {
-    gap: 20,
     marginTop: 40,
   },
   searchResultItem: {
     paddingHorizontal: 8,
+    paddingVertical: 12,
     fontSize: 17,
+    color: theme.color.darkGray2,
   },
 });

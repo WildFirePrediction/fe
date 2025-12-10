@@ -122,7 +122,7 @@ const Shelters = () => {
             isShowCompass={false}
             locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
           >
-            <FireAreaOverlay firePredictionData={firePredictionData} />
+            <FireAreaOverlay />
             {shelters &&
               shelters.map((shelter, index) => (
                 <NaverMapMarkerOverlay
