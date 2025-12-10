@@ -60,7 +60,7 @@ const FirePredictionOverlays: React.FC<Props> = ({ firePredictionData }) => {
               key={`${step.timestep}-polygon`}
               coords={hullCoords}
               color={fireTimestepLayerMap[step.timestep]}
-              outlineWidth={2}
+              outlineWidth={1.5}
               outlineColor={fireTimestepMap[step.timestep]}
               zIndex={5 - step.timestep}
             />
