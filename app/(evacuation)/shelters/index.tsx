@@ -12,13 +12,14 @@ import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanima
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CancelIcon, SortArrowDownIcon } from '../../../assets/svgs/icons';
 import theme from '../../../styles/theme';
-import { Button, MapButton } from '../../../components';
+import { Button, FireAreaOverlay, MapButton } from '../../../components';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { useDestination } from '../../../context/destinationContext';
 import { FullCoord, FullCoordWithName } from '../../../types/locationCoord';
 import useGetSheltersNearby from '../../../apis/hooks/useGetSheltersNearby';
 import { ShelterData } from '../../../apis/types/shelter';
+import { firePredictionData } from '../../../mock/firePredictionData';
 
 const sortOptions = ['거리순', '수용인원순'];
 
@@ -126,6 +127,7 @@ const Shelters = () => {
             isShowCompass={false}
             locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
           >
+            <FireAreaOverlay firePredictionData={firePredictionData} />
             {shelters &&
               shelters.map((shelter, index) => (
                 <NaverMapMarkerOverlay
