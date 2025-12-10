@@ -14,12 +14,12 @@ import { useEffect, useRef, useState } from 'react';
 import theme from '../../../styles/theme';
 import * as Location from 'expo-location';
 import usePostRoutes from '../../../apis/hooks/usePostRoutes';
-import { getBearing } from '../../../utils/mapUtil';
 import { FullCoord } from '../../../types/locationCoord';
 import { useDestination } from '../../../context/destinationContext';
 import { Bubble, FireAreaOverlay } from '../../../components';
 import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useFirePrediction } from '../../../context/firePredictionContext';
 
 const EvacuationRoute = () => {
   const router = useRouter();
@@ -39,6 +39,8 @@ const EvacuationRoute = () => {
   const isFirstRoute = useRef(true);
 
   const postRoute = usePostRoutes();
+  const { firePredictionDatas } = useFirePrediction();
+  // const [dummyData, setDummyData] = useState(false);
 
   const handleGoBack = () => {
     router.back();
@@ -50,12 +52,10 @@ const EvacuationRoute = () => {
     const position = await Location.getCurrentPositionAsync();
     const startLat = position.coords.latitude;
     const startLon = position.coords.longitude;
-    const bearing = getBearing(position, destination);
     setMyLocation({
       latitude: startLat,
       longitude: startLon,
       zoom: 15,
-      bearing: bearing,
     });
 
     postRoute.mutate(
@@ -83,35 +83,74 @@ const EvacuationRoute = () => {
   };
 
   useEffect(() => {
+    if (!destination) return;
+
+    (async () => {
+      const position = await Location.getCurrentPositionAsync();
+      postRoute.mutate(
+        {
+          startLat: position.coords.latitude,
+          startLon: position.coords.longitude,
+          endLat: destination.latitude,
+          endLon: destination.longitude,
+        },
+        {
+          onSuccess: response => {
+            if (response.result) {
+              setDistance(response.result.totalDistance);
+              setTime(response.result.totalTime);
+              setPrevRoute(routeRef.current);
+              setShowRoutePopup(true);
+              const timer = setTimeout(() => {
+                if (prevRoute) {
+                  setShowRoutePopup(false);
+                }
+              }, 10000);
+              setRoute(
+                response.result.path.map(coord => ({
+                  latitude: coord[1],
+                  longitude: coord[0],
+                })),
+              );
+              return () => clearTimeout(timer);
+            }
+          },
+        },
+      );
+    })();
+  }, [firePredictionDatas]);
+
+  useEffect(() => {
     mapRef.current?.setLocationTrackingMode('Face');
 
     // 테스트용 코드 (경로 변경 상황)
     const timer = setTimeout(() => {
-      if (myLocationRef.current) {
-        postRoute.mutate(
-          {
-            startLat: myLocationRef.current.latitude,
-            startLon: myLocationRef.current.longitude,
-            endLat: 37.506038005044,
-            endLon: 126.960421779226,
-          },
-          {
-            onSuccess: response => {
-              if (response.result) {
-                setPrevRoute(routeRef.current);
-                setShowRoutePopup(true);
-                setRoute(
-                  response.result.path.map(coord => ({
-                    latitude: coord[1],
-                    longitude: coord[0],
-                  })),
-                );
-              }
-            },
-          },
-        );
-      }
-    }, 10000);
+      // if (myLocationRef.current) {
+      //   postRoute.mutate(
+      //     {
+      //       startLat: myLocationRef.current.latitude,
+      //       startLon: myLocationRef.current.longitude,
+      //       endLat: 37.506038005044,
+      //       endLon: 126.960421779226,
+      //     },
+      //     {
+      //       onSuccess: response => {
+      //         if (response.result) {
+      //           setPrevRoute(routeRef.current);
+      //           setShowRoutePopup(true);
+      //           setRoute(
+      //             response.result.path.map(coord => ({
+      //               latitude: coord[1],
+      //               longitude: coord[0],
+      //             })),
+      //           );
+      //         }
+      //       },
+      //     },
+      //   );
+      // }
+      // setDummyData(true);
+    }, 5000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -148,7 +187,7 @@ const EvacuationRoute = () => {
 
     const timer = setTimeout(() => {
       setShowAlert(false);
-    }, 5000);
+    }, 10000);
 
     return () => {
       clearTimeout(timer);
@@ -211,7 +250,7 @@ const EvacuationRoute = () => {
                 latitude={route.at(-20)!.latitude}
                 longitude={route.at(-20)!.longitude}
               >
-                <Bubble text="새 경로" />
+                <Bubble text="대피 경로" />
               </NaverMapMarkerOverlay>
             )}
           </NaverMapView>
@@ -235,9 +274,11 @@ const EvacuationRoute = () => {
             >
               <View style={style.alertTextContainer}>
                 <WarningIcon style={style.warningIcon} width={20} height={20} />
-                <Text style={style.alertText}>경로가 변경되었습니다</Text>
+                <Text style={style.alertText}>최신 경로로 안내합니다</Text>
               </View>
-              <Text style={style.alertSubText}>안전한 길로 우회하여 안내합니다</Text>
+              <Text style={style.alertSubText}>
+                최신 산불 예측을 반영하여 안전한 길로 우회하여 안내합니다
+              </Text>
             </LinearGradient>
           </Animatable.View>
         </View>
