@@ -20,6 +20,7 @@ import { Bubble, FireAreaOverlay } from '../../../components';
 import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFirePrediction } from '../../../context/firePredictionContext';
+import { useLocation } from '../../../context/locationContext';
 
 const EvacuationRoute = () => {
   const router = useRouter();
@@ -40,7 +41,8 @@ const EvacuationRoute = () => {
 
   const postRoute = usePostRoutes();
   const { firePredictionDatas } = useFirePrediction();
-  // const [dummyData, setDummyData] = useState(false);
+
+  const { currentLocation, setCurrentLocation } = useLocation();
 
   const handleGoBack = () => {
     router.back();
@@ -49,9 +51,12 @@ const EvacuationRoute = () => {
   const setCurrentPosition = async () => {
     if (!destination) return;
 
-    const position = await Location.getCurrentPositionAsync();
-    const startLat = position.coords.latitude;
-    const startLon = position.coords.longitude;
+    // const position = await Location.getCurrentPositionAsync();
+    // const startLat = position.coords.latitude;
+    // const startLon = position.coords.longitude;
+    const startLat = currentLocation.latitude;
+    const startLon = currentLocation.longitude;
+
     setMyLocation({
       latitude: startLat,
       longitude: startLon,
@@ -86,11 +91,11 @@ const EvacuationRoute = () => {
     if (!destination) return;
 
     (async () => {
-      const position = await Location.getCurrentPositionAsync();
+      // const position = await Location.getCurrentPositionAsync();
       postRoute.mutate(
         {
-          startLat: position.coords.latitude,
-          startLon: position.coords.longitude,
+          startLat: currentLocation.latitude,
+          startLon: currentLocation.longitude,
           endLat: destination.latitude,
           endLon: destination.longitude,
         },
@@ -121,36 +126,12 @@ const EvacuationRoute = () => {
   }, [firePredictionDatas]);
 
   useEffect(() => {
-    mapRef.current?.setLocationTrackingMode('Face');
+    // mapRef.current?.setLocationTrackingMode('Face');
 
     // 테스트용 코드 (경로 변경 상황)
     const timer = setTimeout(() => {
-      // if (myLocationRef.current) {
-      //   postRoute.mutate(
-      //     {
-      //       startLat: myLocationRef.current.latitude,
-      //       startLon: myLocationRef.current.longitude,
-      //       endLat: 37.506038005044,
-      //       endLon: 126.960421779226,
-      //     },
-      //     {
-      //       onSuccess: response => {
-      //         if (response.result) {
-      //           setPrevRoute(routeRef.current);
-      //           setShowRoutePopup(true);
-      //           setRoute(
-      //             response.result.path.map(coord => ({
-      //               latitude: coord[1],
-      //               longitude: coord[0],
-      //             })),
-      //           );
-      //         }
-      //       },
-      //     },
-      //   );
-      // }
-      // setDummyData(true);
-    }, 5000);
+      setCurrentLocation({ latitude: 35.831729, longitude: 128.571416 });
+    }, 10000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -204,7 +185,14 @@ const EvacuationRoute = () => {
             camera={myLocation}
             isShowCompass={false}
             isShowLocationButton={false}
-            locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
+            locationOverlay={{
+              isVisible: true,
+              anchor: { x: 0.5, y: 0.5 },
+              position: {
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+              },
+            }}
           >
             <FireAreaOverlay />
             {prevRoute && (

@@ -21,8 +21,8 @@ export const useLocation = () => {
 
 export const LocationProvider: React.FC<ProviderProps> = ({ children }: ProviderProps) => {
   const [currentLocation, setCurrentLocation] = useState<FullCoord>({
-    latitude: 35.54783268458687,
-    longitude: 128.08025927116012,
+    latitude: 35.830919,
+    longitude: 128.583357,
   });
   const value = { currentLocation, setCurrentLocation };
 

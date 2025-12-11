@@ -17,6 +17,7 @@ import * as Location from 'expo-location';
 import usePostRoutes from '../../../apis/hooks/usePostRoutes';
 import { FullCoord } from '../../../types/locationCoord';
 import { useDestination } from '../../../context/destinationContext';
+import { useLocation } from '../../../context/locationContext';
 
 const EvacuationRoutePreview = () => {
   const router = useRouter();
@@ -24,6 +25,7 @@ const EvacuationRoutePreview = () => {
   const mapRef = useRef<NaverMapViewRef>(null);
 
   const { destination } = useDestination();
+  const { currentLocation } = useLocation();
 
   const [startLocation, setStartLocation] = useState<Camera | undefined>();
   const [route, setRoute] = useState<FullCoord[] | null>(null);
@@ -43,10 +45,12 @@ const EvacuationRoutePreview = () => {
   const setCurrentPosition = async () => {
     if (!destination) return;
 
-    const position = await Location.getCurrentPositionAsync();
+    // const position = await Location.getCurrentPositionAsync();
 
-    const startLat = position.coords.latitude;
-    const startLon = position.coords.longitude;
+    // const startLat = position.coords.latitude;
+    // const startLon = position.coords.longitude;
+    const startLat = currentLocation.latitude;
+    const startLon = currentLocation.longitude;
     setStartLocation({
       latitude: startLat,
       longitude: startLon,
@@ -78,7 +82,7 @@ const EvacuationRoutePreview = () => {
   };
 
   useEffect(() => {
-    mapRef.current?.setLocationTrackingMode('NoFollow');
+    // mapRef.current?.setLocationTrackingMode('NoFollow');
   }, []);
 
   useEffect(() => {
@@ -95,7 +99,14 @@ const EvacuationRoutePreview = () => {
             camera={startLocation}
             isShowCompass={false}
             isShowLocationButton={false}
-            locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
+            locationOverlay={{
+              isVisible: true,
+              anchor: { x: 0.5, y: 0.5 },
+              position: {
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+              },
+            }}
           >
             <FireAreaOverlay />
             {route && (

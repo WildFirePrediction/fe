@@ -20,6 +20,7 @@ import { FullCoord, FullCoordWithName } from '../../../types/locationCoord';
 import useGetSheltersNearby from '../../../apis/hooks/useGetSheltersNearby';
 import { ShelterData } from '../../../apis/types/shelter';
 import { firePredictionData } from '../../../mock/firePredictionData';
+import { useLocation } from '../../../context/locationContext';
 
 const sortOptions = ['거리순', '수용인원순'];
 
@@ -40,6 +41,8 @@ const Shelters = () => {
     hasNextPage: hasMoreShelters,
   } = useGetSheltersNearby(myLocation?.latitude, myLocation?.longitude);
   const [shelters, setShelters] = useState<ShelterData[] | null>(null);
+
+  const { currentLocation } = useLocation();
 
   const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
     top: bottomSheetPosition.value - 80,
@@ -73,10 +76,15 @@ const Shelters = () => {
 
   const moveToCurrentLocation = async () => {
     try {
-      const position = await Location.getCurrentPositionAsync();
+      // const position = await Location.getCurrentPositionAsync();
+      // mapRef.current?.animateCameraTo({
+      //   latitude: position.coords.latitude,
+      //   longitude: position.coords.longitude,
+      //   zoom: 14,
+      // });
       mapRef.current?.animateCameraTo({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
         zoom: 14,
       });
     } catch (error) {
@@ -92,20 +100,24 @@ const Shelters = () => {
       if (resultShelters.length > 0) {
         setCamera({
           ...resultShelters[0],
-          zoom: 14,
+          zoom: 13,
         });
       }
     }
   }, [sheltersResponsePages]);
 
   useEffect(() => {
-    mapRef.current?.setLocationTrackingMode('NoFollow');
+    // mapRef.current?.setLocationTrackingMode('NoFollow');
     // 내위치 설정-> GET api 호출
     (async () => {
-      const currentLocation = await Location.getCurrentPositionAsync();
+      // const currentLocation = await Location.getCurrentPositionAsync();
+      // setMyLocation({
+      //   latitude: currentLocation.coords.latitude,
+      //   longitude: currentLocation.coords.longitude,
+      // });
       setMyLocation({
-        latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude,
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
       });
     })();
   }, []);
@@ -120,7 +132,14 @@ const Shelters = () => {
             isShowLocationButton={false}
             camera={camera}
             isShowCompass={false}
-            locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
+            locationOverlay={{
+              isVisible: true,
+              anchor: { x: 0.5, y: 0.5 },
+              position: {
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+              },
+            }}
           >
             <FireAreaOverlay />
             {shelters &&
