@@ -9,14 +9,15 @@ import {
   SnowIcon,
   WildFireIcon,
 } from '../../../assets/svgs/icons';
-import { myRegionData } from '../../../mock/myRegionsData';
 import { Button, SelectionButton } from '../../../components';
 import { disasterInfoData } from '../../../mock/disasterInfoData';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { disastersKor, disasterMap } from '../../../constants/categories';
 import { Disaster } from '../../../types/disaster';
 import { SvgProps } from 'react-native-svg';
+import useGetUserPreference from '../../../apis/hooks/useGetUserPreference';
+import { RegionResponse } from '../../../apis/types/region';
 
 const iconMap: Record<Disaster, React.FC<SvgProps>> = {
   WILDFIRE: WildFireIcon,
@@ -29,7 +30,9 @@ const iconMap: Record<Disaster, React.FC<SvgProps>> = {
 const DisasterInfoScreen = () => {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<Disaster>('WILDFIRE');
-  const [selectedRegion, setSelectedRegion] = useState(myRegionData.at(0));
+  const [selectedRegion, setSelectedRegion] = useState<RegionResponse | null>(null);
+
+  const { data: myRegions } = useGetUserPreference();
 
   const renderIcon = (item: Disaster) => {
     const IconComponent = iconMap[item];
@@ -51,6 +54,12 @@ const DisasterInfoScreen = () => {
   const handleDisasterDetail = () => {
     router.push('/disasterDetail/1');
   };
+
+  useEffect(() => {
+    if (myRegions && myRegions.length > 0) {
+      setSelectedRegion(myRegions[0]);
+    }
+  }, [myRegions]);
 
   return (
     <SafeAreaView style={style.container} edges={['top', 'left', 'right']}>
@@ -95,15 +104,16 @@ const DisasterInfoScreen = () => {
           <View style={style.regionOptionContainer}>
             <ScrollView horizontal={true} bounces={false}>
               <View style={style.regionSelectionContainer}>
-                {myRegionData.map((region, index) => (
-                  <SelectionButton
-                    key={`${region.name}-${index}`}
-                    selected={region.name === selectedRegion?.name}
-                    onClick={() => setSelectedRegion(region)}
-                  >
-                    {region.name}
-                  </SelectionButton>
-                ))}
+                {myRegions &&
+                  myRegions.map((region, index) => (
+                    <SelectionButton
+                      key={`${region.eupmyeondong}-${index}`}
+                      selected={region.eupmyeondong === selectedRegion?.eupmyeondong}
+                      onClick={() => setSelectedRegion(region)}
+                    >
+                      {region.eupmyeondong}
+                    </SelectionButton>
+                  ))}
               </View>
             </ScrollView>
             <Button

@@ -8,20 +8,19 @@ import * as Location from 'expo-location';
 import { Camera, NaverMapView, NaverMapViewRef } from '@mj-studio/react-native-naver-map';
 import theme from '../../styles/theme';
 import { AlertBellIcon, BubbleTail, DownArrowIcon, RainIcon } from '../../assets/svgs/icons';
-import { myRegionData } from '../../mock/myRegionsData';
 import { useRouter } from 'expo-router';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { disasterTextData } from '../../mock/disasterTextData';
-import { getStorageItem } from '../../utils/storageUtil';
-import { ASYNC_STORAGE_KEYS } from '../../constants/storageKey';
 import { useFirePrediction } from '../../context/firePredictionContext';
+import useGetUserPreference from '../../apis/hooks/useGetUserPreference';
+import { RegionResponse } from '../../apis/types/region';
 
 const WildFireMapScreen = () => {
   const router = useRouter();
   const mapRef = useRef<NaverMapViewRef>(null);
 
-  const [selectedRegion, setSelectedRegion] = useState(myRegionData.at(0));
-  const [camera, setCamera] = useState<Camera | undefined>(myRegionData.at(0));
+  const [selectedRegion, setSelectedRegion] = useState<RegionResponse | null>(null);
+  const [camera, setCamera] = useState<Camera | undefined>(undefined);
   const [isWeatherReportOpen, setIsWeatherReportOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState<Record<number, boolean>>({});
   const [isFireOccur, setIsFireOccur] = useState(false);
@@ -32,11 +31,10 @@ const WildFireMapScreen = () => {
   }));
 
   const { firePredictionDatas } = useFirePrediction();
+  const { data: myRegionData } = useGetUserPreference();
 
-  const handleSelectRegion = (regionName: string) => {
-    const region = myRegionData.find(myRegion => myRegion.name === regionName);
+  const handleSelectRegion = (region: RegionResponse) => {
     setSelectedRegion(region);
-    setCamera(region ? { ...region, zoom: 13.5 } : region);
   };
 
   const handleSetRegion = () => {
@@ -86,20 +84,25 @@ const WildFireMapScreen = () => {
         if (granted) {
           await Location.requestBackgroundPermissionsAsync();
           mapRef.current?.setLocationTrackingMode('NoFollow');
-          setCamera(selectedRegion ? { ...selectedRegion, zoom: 13.5 } : selectedRegion);
 
-          const myRegions = await getStorageItem<string[]>(ASYNC_STORAGE_KEYS.MY_REGIONS);
-          if (myRegions === null) {
-            const currentLocation = await Location.getCurrentPositionAsync();
-            // TODO: 백엔드에 내 지역 POST
-            // TODO: AsyncStorage에 지역 저장
-          }
+          const currentPosition = await Location.getCurrentPositionAsync();
+          setCamera({
+            latitude: currentPosition.coords.latitude,
+            longitude: currentPosition.coords.longitude,
+            zoom: 13.5,
+          });
         }
       } catch (e) {
         console.error(`Location request has been failed: ${e}`);
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (myRegionData && myRegionData.length > 0) {
+      setSelectedRegion(myRegionData[0]);
+    }
+  }, [myRegionData]);
 
   useEffect(() => {
     setIsMessageOpen(Object.fromEntries(disasterTextData.map(item => [item.id, false])));
@@ -157,15 +160,16 @@ const WildFireMapScreen = () => {
         >
           <BottomSheetView style={style.bottomSheetView}>
             <View style={style.bottomSheetRegionButtonsContainer}>
-              {myRegionData.map(myRegion => (
-                <SelectionButton
-                  key={myRegion.name}
-                  selected={selectedRegion?.name === myRegion.name}
-                  onClick={handleSelectRegion}
-                >
-                  {myRegion.name}
-                </SelectionButton>
-              ))}
+              {myRegionData &&
+                myRegionData.map(myRegion => (
+                  <SelectionButton
+                    key={myRegion.eupmyeondong}
+                    selected={selectedRegion?.eupmyeondong === myRegion.eupmyeondong}
+                    onClick={() => handleSelectRegion(myRegion)}
+                  >
+                    {myRegion.eupmyeondong}
+                  </SelectionButton>
+                ))}
               <Button
                 buttonType="setting"
                 onClick={handleSetRegion}

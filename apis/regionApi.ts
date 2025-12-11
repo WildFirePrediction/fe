@@ -1,12 +1,8 @@
 import { apiGet, apiPost } from './axios/apiUtil';
-import {
-  GetRegionSearchParams,
-  GetRegionSearchResponse,
-  GetUserPreferenceResponse,
-} from './types/region';
+import { GetRegionSearchParams, RegionResponse } from './types/region';
 
 export const getUserPreferences = async () => {
-  return apiGet<GetUserPreferenceResponse[]>('/user-preferences');
+  return apiGet<RegionResponse[]>('/user-preferences');
 };
 
 export const postUserPreferences = async (regionIds: number[]) => {
@@ -14,5 +10,5 @@ export const postUserPreferences = async (regionIds: number[]) => {
 };
 
 export const getRegionsSearch = async ({ keyword }: GetRegionSearchParams) => {
-  return apiGet<GetRegionSearchResponse[]>('/regions/search', { keyword });
+  return apiGet<RegionResponse[]>('/regions/search', { keyword });
 };

@@ -14,12 +14,14 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import useGetRegionSearch from '../apis/hooks/useGetRegionSearch';
 import usePostUserPreference from '../apis/hooks/usePostUserPreference';
+import useGetUserPreference from '../apis/hooks/useGetUserPreference';
 
 const RegionSearch = () => {
   const router = useRouter();
   const [keyword, setKeyword] = useState('');
 
   const { data: searchData } = useGetRegionSearch(keyword);
+  const { data: regionPreferencceData } = useGetUserPreference();
   const postRegion = usePostUserPreference();
 
   const handleInputChange = (text: string) => {
@@ -27,8 +29,12 @@ const RegionSearch = () => {
   };
 
   const handlePressItem = (regionId: number) => {
-    postRegion.mutate([regionId]);
-    router.back();
+    if (regionPreferencceData !== undefined) {
+      let newData = regionPreferencceData.map(region => region.id);
+      if (!newData.includes(regionId)) newData = [...newData, regionId];
+      postRegion.mutate(newData);
+      router.back();
+    }
   };
 
   return (

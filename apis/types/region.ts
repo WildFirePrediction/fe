@@ -1,15 +1,7 @@
 export interface GetUserPreferenceResponse {
   id: number;
-  region: Region;
+  region: RegionResponse;
   userDevice: UserDevice;
-}
-
-export interface Region {
-  id: number;
-  adminCode: string;
-  sido: string;
-  sigungu: string;
-  eupmyeondong: string;
 }
 
 export interface UserDevice {
@@ -21,7 +13,7 @@ export interface GetRegionSearchParams {
   keyword: string;
 }
 
-export interface GetRegionSearchResponse {
+export interface RegionResponse {
   id: number;
   sido: string;
   sigungu: string;

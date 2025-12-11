@@ -3,18 +3,27 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CancelIcon, RegionItemDeleteIcon } from '../assets/svgs/icons';
 import theme from '../styles/theme';
 import { Button } from '../components';
-import { myRegionData } from '../mock/myRegionsData';
 import { useRouter } from 'expo-router';
+import useGetUserPreference from '../apis/hooks/useGetUserPreference';
+import usePostUserPreference from '../apis/hooks/usePostUserPreference';
 
 const RegionSetting = () => {
   const router = useRouter();
+
+  const { data: myRegions } = useGetUserPreference();
+  const postRegions = usePostUserPreference();
 
   const handleAddRegion = () => {
     router.push('/regionSearch');
   };
 
-  const handleDeleteRegion = () => {
-    /* TODO: 내 지역 삭제 API 호출 및 상태 업데이트 */
+  const handleDeleteRegion = (regionId: number) => {
+    if (myRegions !== undefined) {
+      const newRegions = myRegions
+        ?.filter(region => region.id !== regionId)
+        .map(region => region.id);
+      postRegions.mutate(newRegions);
+    }
   };
 
   return (
@@ -25,20 +34,20 @@ const RegionSetting = () => {
       </View>
       <View style={style.contentContainer}>
         <Text style={style.descriptionText}>
-          내 지역은 <Text style={style.descriptionHighlightText}>{myRegionData.length}개</Text>까지
-          설정 가능합니다
+          내 지역은 <Text style={style.descriptionHighlightText}>3개</Text>까지 설정 가능합니다
         </Text>
         <View style={style.regionListContainer}>
-          {myRegionData.map(region => (
-            <View style={style.regionItem} key={region.name}>
-              <Text style={style.regionItemText}>{region.name}</Text>
-              <TouchableOpacity onPress={() => handleDeleteRegion()}>
-                <RegionItemDeleteIcon style={style.regionDeleteButtonIcon} />
-              </TouchableOpacity>
-            </View>
-          ))}
+          {myRegions &&
+            myRegions.map(region => (
+              <View style={style.regionItem} key={region.eupmyeondong}>
+                <Text style={style.regionItemText}>{region.eupmyeondong}</Text>
+                <TouchableOpacity onPress={() => handleDeleteRegion(region.id)}>
+                  <RegionItemDeleteIcon style={style.regionDeleteButtonIcon} />
+                </TouchableOpacity>
+              </View>
+            ))}
         </View>
-        {myRegionData.length < 3 && (
+        {myRegions && myRegions.length < 3 && (
           <Button buttonType="full" onClick={handleAddRegion} customStyle={style.addRegionButton}>
             지역 추가
           </Button>
@@ -76,7 +85,7 @@ const style = StyleSheet.create({
   },
   contentContainer: {
     width: '100%',
-    marginTop: 65,
+    marginTop: 55,
   },
   descriptionText: {
     fontSize: 20,
