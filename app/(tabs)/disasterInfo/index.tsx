@@ -34,9 +34,7 @@ const iconMap: Record<Disaster, React.FC<SvgProps>> = {
 const DisasterInfoScreen = () => {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<Disaster>('WILDFIRE');
-  const [selectedRegion, setSelectedRegion] = useState<RegionResponse | null>(null);
 
-  const { data: myRegions } = useGetUserPreference();
   const { data: wildFireData } = useGetDisasterInfoWildfire();
   const { data: earthquakeData } = useGetDisasterInfoEarthquake();
 
@@ -52,20 +50,6 @@ const DisasterInfoScreen = () => {
   const handleShowMap = () => {
     router.push('/disasterInfoMap');
   };
-
-  const handleRegionSetting = () => {
-    router.push('/regionSetting');
-  };
-
-  const handleDisasterDetail = () => {
-    router.push('/disasterDetail/1');
-  };
-
-  useEffect(() => {
-    if (myRegions && myRegions.length > 0) {
-      setSelectedRegion(myRegions[0]);
-    }
-  }, [myRegions]);
 
   return (
     <SafeAreaView style={style.container} edges={['top', 'left', 'right']}>
@@ -110,24 +94,14 @@ const DisasterInfoScreen = () => {
           <View style={style.resultListContainer}>
             {selectedCategory === 'WILDFIRE' &&
               wildFireData?.wildfires.map(item => (
-                <TouchableOpacity
-                  key={`${item.id}`}
-                  style={style.resultListItem}
-                  activeOpacity={1}
-                  onPress={() => handleDisasterDetail()}
-                >
+                <TouchableOpacity key={`${item.id}`} style={style.resultListItem} activeOpacity={1}>
                   <Text style={style.resultItemDateText}>{item.ignitionDateTime}</Text>
                   <Text style={style.resultItemText}>{item.address}</Text>
                 </TouchableOpacity>
               ))}
             {selectedCategory === 'EARTHQUAKE' &&
               earthquakeData?.earthquakes.map(item => (
-                <TouchableOpacity
-                  key={`${item.id}`}
-                  style={style.resultListItem}
-                  activeOpacity={1}
-                  onPress={() => handleDisasterDetail()}
-                >
+                <TouchableOpacity key={`${item.id}`} style={style.resultListItem} activeOpacity={1}>
                   <Text style={style.resultItemDateText}>{item.occurrenceTime}</Text>
                   <Text style={style.resultItemText}>{item.position}</Text>
                   <View style={style.resultEarthquakeContainer}>

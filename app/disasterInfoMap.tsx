@@ -19,6 +19,10 @@ import { router } from 'expo-router';
 import * as Location from 'expo-location';
 import useGetUserPreference from '../apis/hooks/useGetUserPreference';
 import { RegionResponse } from '../apis/types/region';
+import useGetDisasterInfoWildfire from '../apis/hooks/useGetDisasterInfoWildfire';
+import useGetDisasterInfoEarthquake from '../apis/hooks/useGetDisasterInfoEarthquake';
+
+const disasterCategories = ['산불', '지진'];
 
 const DisasterInfoMap = () => {
   const mapRef = useRef<NaverMapViewRef>(null);
@@ -27,6 +31,9 @@ const DisasterInfoMap = () => {
   const [selectedRegion, setSelectedRegion] = useState<RegionResponse | null>(null);
 
   const { data: myRegions } = useGetUserPreference();
+
+  const { data: wildFireData } = useGetDisasterInfoWildfire();
+  const { data: earthquakeData } = useGetDisasterInfoEarthquake();
 
   const handleSelectRegion = (region: RegionResponse) => {
     setSelectedRegion(region);
@@ -81,16 +88,30 @@ const DisasterInfoMap = () => {
             isShowCompass={false}
             locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
           >
-            {floodMapData.map((item, index) => (
-              <NaverMapMarkerOverlay
-                key={`${item.latitude}-${index}`}
-                latitude={item.latitude}
-                longitude={item.longitude}
-                image={require('../assets/pngs/floodMarker.png')}
-                caption={{ text: item.date, align: 'Top' }}
-                onTap={() => handleDisasterDetail()}
-              />
-            ))}
+            {selectedCategory === 'WILDFIRE' &&
+              wildFireData &&
+              wildFireData.wildfires.map(item => (
+                <NaverMapMarkerOverlay
+                  key={`${item.id}`}
+                  latitude={item.y}
+                  longitude={item.x}
+                  image={{ symbol: 'red' }}
+                  caption={{ text: item.ignitionDateTime.substring(0, 10), align: 'Top' }}
+                  isHideCollidedCaptions={true}
+                />
+              ))}
+            {selectedCategory === 'EARTHQUAKE' &&
+              earthquakeData &&
+              earthquakeData.earthquakes.map(item => (
+                <NaverMapMarkerOverlay
+                  key={`${item.id}`}
+                  latitude={item.latitude}
+                  longitude={item.longitude}
+                  image={{ symbol: 'green' }}
+                  caption={{ text: item.occurrenceTime.substring(0, 10), align: 'Top' }}
+                  isHideCollidedCaptions={true}
+                />
+              ))}
           </NaverMapView>
           <View style={style.headerContainer}>
             <View style={style.header}>
@@ -101,7 +122,7 @@ const DisasterInfoMap = () => {
             </View>
             <View style={style.regionSelectionContainer}>
               <ScrollView horizontal={true} bounces={false}>
-                <View style={style.regionSelectionListContainer}>
+                {/* <View style={style.regionSelectionListContainer}>
                   {myRegions &&
                     myRegions.map((region, index) => (
                       <SelectionButton
@@ -112,11 +133,11 @@ const DisasterInfoMap = () => {
                         {region.eupmyeondong}
                       </SelectionButton>
                     ))}
-                </View>
+                </View> */}
               </ScrollView>
             </View>
             <View style={style.categoryContainer}>
-              {disastersKor.map(category => (
+              {disasterCategories.map(category => (
                 <TouchableOpacity
                   key={category}
                   style={
@@ -173,6 +194,7 @@ const style = StyleSheet.create({
     position: 'absolute',
     fontSize: 20,
     fontWeight: 'bold',
+    marginEnd: 60,
   },
   regionSelectionContainer: {
     width: '100%',
