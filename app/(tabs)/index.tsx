@@ -14,6 +14,7 @@ import { disasterTextData } from '../../mock/disasterTextData';
 import { useFirePrediction } from '../../context/firePredictionContext';
 import useGetUserPreference from '../../apis/hooks/useGetUserPreference';
 import { RegionResponse } from '../../apis/types/region';
+import { useLocation } from '../../context/locationContext';
 
 const WildFireMapScreen = () => {
   const router = useRouter();
@@ -32,6 +33,8 @@ const WildFireMapScreen = () => {
 
   const { firePredictionDatas } = useFirePrediction();
   const { data: myRegionData } = useGetUserPreference();
+
+  const { currentLocation, setCurrentLocation } = useLocation();
 
   const handleSelectRegion = (region: RegionResponse) => {
     setSelectedRegion(region);
@@ -55,11 +58,16 @@ const WildFireMapScreen = () => {
 
   const moveToCurrentLocation = async () => {
     try {
-      const position = await Location.getCurrentPositionAsync();
+      // const position = await Location.getCurrentPositionAsync();
 
+      // mapRef.current?.animateCameraTo({
+      //   latitude: position.coords.latitude,
+      //   longitude: position.coords.longitude,
+      //   zoom: 13.5,
+      // });
       mapRef.current?.animateCameraTo({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
         zoom: 13.5,
       });
     } catch (error) {
@@ -83,12 +91,17 @@ const WildFireMapScreen = () => {
         const { granted } = await Location.requestForegroundPermissionsAsync();
         if (granted) {
           await Location.requestBackgroundPermissionsAsync();
-          mapRef.current?.setLocationTrackingMode('NoFollow');
+          // mapRef.current?.setLocationTrackingMode('NoFollow');
 
-          const currentPosition = await Location.getCurrentPositionAsync();
+          // const currentPosition = await Location.getCurrentPositionAsync();
+          // setCamera({
+          //   latitude: currentPosition.coords.latitude,
+          //   longitude: currentPosition.coords.longitude,
+          //   zoom: 13.5,
+          // });
           setCamera({
-            latitude: currentPosition.coords.latitude,
-            longitude: currentPosition.coords.longitude,
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
             zoom: 13.5,
           });
         }
@@ -123,7 +136,14 @@ const WildFireMapScreen = () => {
           camera={camera}
           isShowZoomControls={false}
           isShowLocationButton={false}
-          locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
+          locationOverlay={{
+            isVisible: true,
+            anchor: { x: 0.5, y: 0.5 },
+            position: {
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude,
+            },
+          }}
         >
           <FireAreaOverlay />
         </NaverMapView>
@@ -179,80 +199,92 @@ const WildFireMapScreen = () => {
               </Button>
             </View>
             <View style={style.bottomSheetBody}>
-              <View style={style.bottomSheetSection}>
-                <Text style={style.bottomSheetSectionLabel}>기상 특보</Text>
-                <TouchableOpacity
-                  style={style.bottomSheetWeatherReport}
-                  onPress={handleToggleWeatherReport}
-                  activeOpacity={1}
-                >
-                  <View style={style.bottomSheetWeatherReportTitle}>
-                    <AlertBellIcon style={style.bottomSheetWeatherReportTitleIcon} />
-                    <Text style={style.bottomSheetWeatherReportTitleText}>
-                      <Text style={style.bottomSheetWeatherReportTitleHightlightText}>
-                        건조주의보
-                      </Text>{' '}
-                      발효 중
-                    </Text>
-                    <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
-                  </View>
-                  {isWeatherReportOpen && (
-                    <View style={style.bottomSheetWeatherReportContent}>
-                      <View style={style.bottomSheetWeatherReportTimeContainer}>
-                        <Text style={style.bottomSheetWeatherReportTimeText}>
-                          발표 2025.11.17 11:00
+              {myRegionData && myRegionData.length > 0 && (
+                <>
+                  <View style={style.bottomSheetSection}>
+                    <Text style={style.bottomSheetSectionLabel}>기상 특보</Text>
+                    <TouchableOpacity
+                      style={style.bottomSheetWeatherReport}
+                      onPress={handleToggleWeatherReport}
+                      activeOpacity={1}
+                    >
+                      <View style={style.bottomSheetWeatherReportTitle}>
+                        <AlertBellIcon style={style.bottomSheetWeatherReportTitleIcon} />
+                        <Text style={style.bottomSheetWeatherReportTitleText}>
+                          <Text style={style.bottomSheetWeatherReportTitleHightlightText}>
+                            건조주의보
+                          </Text>{' '}
+                          발효 중
                         </Text>
-                        <Text style={style.bottomSheetWeatherReportTimeText}>
-                          발효 2025.11.17 11:00
-                        </Text>
+                        <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
                       </View>
+                      {isWeatherReportOpen && (
+                        <View style={style.bottomSheetWeatherReportContent}>
+                          <View style={style.bottomSheetWeatherReportTimeContainer}>
+                            <Text style={style.bottomSheetWeatherReportTimeText}>
+                              발표 2025.11.17 11:00
+                            </Text>
+                            <Text style={style.bottomSheetWeatherReportTimeText}>
+                              발효 2025.11.17 11:00
+                            </Text>
+                          </View>
 
-                      <Text style={style.bottomSheetWeatherReportRegions}>
-                        강원 북부 산지, 강원중부산지, 강원 남부산지, 영덕, 울진평지, 포항,
-                        경북북동산지
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              </View>
-              <View style={style.bottomSheetSection}>
-                <Text style={style.bottomSheetSectionLabel}>재난 문자</Text>
-                {disasterTextData.map(item => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={style.bottomSheetMessageContainer}
-                    onPress={() => handleToggleMessage(item.id)}
-                    activeOpacity={1}
-                  >
-                    <View style={style.bottomSheetWeatherReportTitle}>
-                      <View
-                        style={{
-                          ...style.bottomSheetMessageBadge,
-                          backgroundColor: theme.color.rain,
-                        }}
+                          <Text style={style.bottomSheetWeatherReportRegions}>
+                            강원 북부 산지, 강원중부산지, 강원 남부산지, 영덕, 울진평지, 포항,
+                            경북북동산지
+                          </Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                  <View style={style.bottomSheetSection}>
+                    <Text style={style.bottomSheetSectionLabel}>재난 문자</Text>
+                    {disasterTextData.map(item => (
+                      <TouchableOpacity
+                        key={item.id}
+                        style={style.bottomSheetMessageContainer}
+                        onPress={() => handleToggleMessage(item.id)}
+                        activeOpacity={1}
                       >
-                        <RainIcon
-                          width={18}
-                          height={18}
-                          style={style.bottomSheetMessageBadgeIcon}
-                        />
-                        <Text style={style.bottomSheetMessageBadgeText}>호우</Text>
-                      </View>
-                      <Text style={style.bottomSheetMessageTitleText}>횡성</Text>
-                      <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
-                    </View>
-                    {isMessageOpen[item.id] && (
-                      <>
-                        <Text style={style.bottomSheetWeatherReportTimeText}>2025.11.22 22:55</Text>
-                        <Text style={style.bottomSheetMessageText}>
-                          오늘 16시 30분 호우주의보 발효. 개울가 하천 계곡 등 야영객은 안전한 장소로
-                          대피하여 주시고 시설물 관리 및 안전사고에 유의하여 주시기 바랍니다{' '}
-                        </Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
+                        <View style={style.bottomSheetWeatherReportTitle}>
+                          <View
+                            style={{
+                              ...style.bottomSheetMessageBadge,
+                              backgroundColor: theme.color.rain,
+                            }}
+                          >
+                            <RainIcon
+                              width={18}
+                              height={18}
+                              style={style.bottomSheetMessageBadgeIcon}
+                            />
+                            <Text style={style.bottomSheetMessageBadgeText}>호우</Text>
+                          </View>
+                          <Text style={style.bottomSheetMessageTitleText}>횡성</Text>
+                          <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
+                        </View>
+                        {isMessageOpen[item.id] && (
+                          <>
+                            <Text style={style.bottomSheetWeatherReportTimeText}>
+                              2025.11.22 22:55
+                            </Text>
+                            <Text style={style.bottomSheetMessageText}>
+                              오늘 16시 30분 호우주의보 발효. 개울가 하천 계곡 등 야영객은 안전한
+                              장소로 대피하여 주시고 시설물 관리 및 안전사고에 유의하여 주시기
+                              바랍니다{' '}
+                            </Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </>
+              )}
+              {myRegionData && myRegionData.length === 0 && (
+                <View style={style.noDataContainer}>
+                  <Text style={style.noDataText}>내 지역을 설정하고 재난 정보를 확인하세요!</Text>
+                </View>
+              )}
             </View>
           </BottomSheetView>
         </BottomSheet>
@@ -463,5 +495,16 @@ const style = StyleSheet.create({
     marginTop: -7,
     marginEnd: 20,
     color: theme.color.darkGray2,
+  },
+  noDataContainer: {
+    width: '100%',
+    borderColor: theme.color.gray,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 10,
+  },
+  noDataText: {
+    fontSize: 15,
   },
 });
