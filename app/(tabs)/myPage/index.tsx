@@ -58,7 +58,7 @@ const MyPageScreen = () => {
             <Text style={style.menuItemText}>지역 설정</Text>
             <ArrowIcon />
           </TouchableOpacity>
-          <View style={style.notificationContainer}>
+          {/* <View style={style.notificationContainer}>
             <Text style={style.menuItemText}>재난 유형별 알림 설정</Text>
             <FlatList
               data={disasters}
@@ -92,7 +92,7 @@ const MyPageScreen = () => {
                 );
               }}
             />
-          </View>
+          </View> */}
         </View>
         {/* <View style={style.section}>
           <View style={style.sectionLabel}>
@@ -198,7 +198,7 @@ const style = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomWidth: 1,
+    // borderBottomWidth: 1,
     borderBottomColor: theme.color.gray,
   },
   menuItemText: {

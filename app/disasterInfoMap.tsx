@@ -194,7 +194,8 @@ const style = StyleSheet.create({
     position: 'absolute',
     fontSize: 20,
     fontWeight: 'bold',
-    marginEnd: 60,
+    marginEnd: 30,
+    marginStart: 30,
   },
   regionSelectionContainer: {
     width: '100%',
