@@ -9,7 +9,7 @@ import { useRouter } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CancelIcon, WarningIcon } from '../../../assets/svgs/icons';
+import { AlertBellIcon, CancelIcon, WarningIcon } from '../../../assets/svgs/icons';
 import { useEffect, useRef, useState } from 'react';
 import theme from '../../../styles/theme';
 import * as Location from 'expo-location';
@@ -34,6 +34,7 @@ const EvacuationRoute = () => {
   const [time, setTime] = useState(0);
   const [showAlert, setShowAlert] = useState(false);
   const [showRoutePopup, setShowRoutePopup] = useState(false);
+  const [showFireAlert, setShowFireAlert] = useState(false);
 
   const myLocationRef = useRef<Camera | undefined>(undefined);
   const routeRef = useRef<FullCoord[]>(null);
@@ -81,6 +82,10 @@ const EvacuationRoute = () => {
                 longitude: coord[0],
               })),
             );
+            setMyLocation({
+              latitude: startLat,
+              longitude: startLon,
+            });
           }
         },
       },
@@ -89,6 +94,10 @@ const EvacuationRoute = () => {
 
   useEffect(() => {
     if (!destination) return;
+    setShowFireAlert(true);
+    const fireAlertTimer = setTimeout(() => {
+      setShowFireAlert(false);
+    }, 5000);
 
     (async () => {
       // const position = await Location.getCurrentPositionAsync();
@@ -123,6 +132,7 @@ const EvacuationRoute = () => {
         },
       );
     })();
+    return () => clearTimeout(fireAlertTimer);
   }, [firePredictionDatas]);
 
   useEffect(() => {
@@ -130,7 +140,7 @@ const EvacuationRoute = () => {
 
     // 테스트용 코드 (경로 변경 상황)
     const timer = setTimeout(() => {
-      setCurrentLocation({ latitude: 35.831729, longitude: 128.571416 });
+      setCurrentLocation({ latitude: 35.835499, longitude: 128.579662 });
     }, 10000);
     return () => clearTimeout(timer);
   }, []);
@@ -244,6 +254,12 @@ const EvacuationRoute = () => {
               </NaverMapMarkerOverlay>
             )}
           </NaverMapView>
+          {showFireAlert && (
+            <View style={style.alertPopup}>
+              <AlertBellIcon style={style.alertPopupIcon} />
+              <Text style={style.alertPopupText}>산불 확산 예측 범위를 확인하세요</Text>
+            </View>
+          )}
           <CancelIcon style={style.closeIcon} onPress={handleGoBack} />
           <View style={style.routeInfoContainer}>
             <Text style={style.routeInfoDistanceText}>{distance}m</Text>
@@ -384,5 +400,33 @@ const style = StyleSheet.create({
   routeInfoTimeText: {
     fontSize: 16,
     color: theme.color.darkGray2,
+  },
+  alertPopup: {
+    position: 'absolute',
+    top: 90,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: theme.color.fire,
+    alignItems: 'center',
+    shadowColor: theme.color.black,
+    shadowOpacity: 0.25,
+    shadowOffset: {
+      width: 4,
+      height: 4,
+    },
+    elevation: 5,
+  },
+  alertPopupIcon: {
+    color: theme.color.white,
+    width: 22,
+  },
+  alertPopupText: {
+    fontSize: 15,
+    color: theme.color.white,
+    fontWeight: 'bold',
   },
 });
