@@ -212,10 +212,10 @@ const Shelters = () => {
           >
             <BottomSheetScrollView style={style.bottomSheetView}>
               <View style={style.bottomSheetOptionContainer}>
-                <Pressable style={style.sortContainer} onPress={() => setSortModalOpen(true)}>
+                {/* <Pressable style={style.sortContainer} onPress={() => setSortModalOpen(true)}>
                   <Text style={style.sortText}>{sortType}</Text>
                   <SortArrowDownIcon style={style.sortArrowIconStyle} />
-                </Pressable>
+                </Pressable> */}
                 <Text style={style.numberOfSheltersText}>주변 대피소 {shelters?.length}개</Text>
               </View>
               <View style={style.bottomSheetListContainer}>
@@ -288,7 +288,8 @@ const style = StyleSheet.create({
   },
   bottomSheetOptionContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'flex-end',
+    width: '100%',
   },
   sortContainer: {
     flexDirection: 'row',
@@ -306,7 +307,8 @@ const style = StyleSheet.create({
   numberOfSheltersText: {
     fontSize: 16,
     color: theme.color.darkGray1,
-    marginEnd: 20,
+    marginStart: 20,
+    alignSelf: 'flex-end',
   },
   bottomSheetListContainer: {
     gap: 10,

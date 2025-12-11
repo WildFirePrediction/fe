@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import theme from '../styles/theme';
-import { BubbleTail } from '../assets/svgs/icons';
+import { BubbleTail, BubbleTailBorder } from '../assets/svgs/icons';
 
 interface BubbleProps {
   text: string;
@@ -15,7 +15,7 @@ const Bubble: React.FC<BubbleProps> = ({ text }: BubbleProps) => {
       </View>
       <View style={styles.tailOverlay} />
       <View style={styles.tailContainer}>
-        <BubbleTail color={theme.color.main} />
+        <BubbleTailBorder color={theme.color.white} />
       </View>
     </View>
   );
@@ -35,13 +35,15 @@ const styles = StyleSheet.create({
   bubble: {
     paddingHorizontal: 14,
     paddingVertical: 12,
-    backgroundColor: theme.color.main,
+    backgroundColor: theme.color.white,
+    borderWidth: 1,
+    borderColor: theme.color.darkGray2,
     borderRadius: 10,
     maxWidth: '80%',
   },
   tailContainer: {
     overflow: 'hidden',
-    marginTop: -3,
+    marginTop: -4,
   },
 
   tail: {
@@ -51,14 +53,14 @@ const styles = StyleSheet.create({
   },
   tailOverlay: {
     width: 20,
-    height: 3,
-    backgroundColor: theme.color.main,
-    marginTop: -4,
+    height: 4,
+    backgroundColor: theme.color.white,
+    marginTop: -3,
     zIndex: 100,
   },
   text: {
     fontSize: 14,
-    color: theme.color.white,
+    color: theme.color.darkGray3,
     fontWeight: '900',
   },
 });
