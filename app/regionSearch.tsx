@@ -59,7 +59,7 @@ const RegionSearch = () => {
                 <TouchableOpacity
                   key={`${region}-${index}`}
                   onPress={() => handlePressItem(region.id)}
-                  activeOpacity={0.8}
+                  activeOpacity={0.6}
                 >
                   <Text
                     style={style.searchResultItem}
@@ -94,7 +94,7 @@ const style = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 17,
     borderRadius: 5,
-    backgroundColor: theme.color.lightGray2,
+    backgroundColor: theme.color.gray,
   },
   searchCancelText: {
     fontSize: 19,
@@ -105,7 +105,7 @@ const style = StyleSheet.create({
   },
   searchResultItem: {
     paddingHorizontal: 8,
-    paddingVertical: 12,
+    paddingVertical: 15,
     fontSize: 17,
     color: theme.color.darkGray2,
   },
