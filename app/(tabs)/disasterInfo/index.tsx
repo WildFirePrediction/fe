@@ -95,14 +95,18 @@ const DisasterInfoScreen = () => {
             {selectedCategory === 'WILDFIRE' &&
               wildFireData?.wildfires.map(item => (
                 <TouchableOpacity key={`${item.id}`} style={style.resultListItem} activeOpacity={1}>
-                  <Text style={style.resultItemDateText}>{item.ignitionDateTime}</Text>
+                  <Text style={style.resultItemDateText}>
+                    {item.ignitionDateTime.substring(0, 16)}
+                  </Text>
                   <Text style={style.resultItemText}>{item.address}</Text>
                 </TouchableOpacity>
               ))}
             {selectedCategory === 'EARTHQUAKE' &&
               earthquakeData?.earthquakes.map(item => (
                 <TouchableOpacity key={`${item.id}`} style={style.resultListItem} activeOpacity={1}>
-                  <Text style={style.resultItemDateText}>{item.occurrenceTime}</Text>
+                  <Text style={style.resultItemDateText}>
+                    {item.occurrenceTime.substring(0, 16)}
+                  </Text>
                   <Text style={style.resultItemText}>{item.position}</Text>
                   <View style={style.resultEarthquakeContainer}>
                     <Text style={style.resultEarthquakeMessageText}>{item.refMatter}</Text>

@@ -245,14 +245,6 @@ const Shelters = () => {
                       <View style={style.listItemDetailContainer}>
                         <Text style={style.listItemmTypeText}>{shelter.shelterTypeName}</Text>
                         <View style={style.listItemButtonContainer}>
-                          <Button
-                            buttonType="action"
-                            colorStyle="white"
-                            onClick={handleShelterInfo}
-                            customStyle={{ alignSelf: 'auto' }}
-                          >
-                            대피소 정보
-                          </Button>
                           <TouchableOpacity
                             style={style.listItemStartButton}
                             activeOpacity={0.5}

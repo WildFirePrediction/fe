@@ -29,7 +29,7 @@ const WildFireMapScreen = () => {
   const bottomSheetPosition = useSharedValue<number>(0);
 
   const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
-    top: bottomSheetPosition.value - (isFireOccur ? 190 : 70),
+    top: bottomSheetPosition.value - (isFireOccur ? 140 : 70),
   }));
 
   const { firePredictionDatas } = useFirePrediction();
@@ -152,15 +152,15 @@ const WildFireMapScreen = () => {
         {isFireOccur && (
           <View style={style.alertPopup}>
             <AlertBellIcon style={style.alertPopupIcon} />
-            <Text style={style.alertPopupText}>산불이 발생했습니다. 신속하게 대피하세요</Text>
+            <Text style={style.alertPopupText}>산불이 발생했습니다. 발생 지역을 확인하세요</Text>
           </View>
         )}
         <Animated.View style={[style.floatingButtonsContainer, floatingButtonsAnimatedStyle]}>
-          {isFireOccur && (
+          {/* {isFireOccur && (
             <MapButton type="fire" customStyle={style.fireMapButton} onClick={moveToFire} />
-          )}
+          )} */}
           <MapButton onClick={moveToCurrentLocation} />
-          {isFireOccur && (
+          {/* {isFireOccur && (
             <View style={style.navigationButtonContainer}>
               <View style={style.popupBubbleContainer}>
                 <View style={style.popupBubble}>
@@ -168,10 +168,12 @@ const WildFireMapScreen = () => {
                 </View>
                 <BubbleTail style={style.popupBubbleTail} />
               </View>
-              <Button buttonType="floating" onClick={() => handleNavigateToEvacuation()}>
-                대피 안내
-              </Button>
             </View>
+          )}{' '} */}
+          {isFireOccur && (
+            <Button buttonType="floating" onClick={() => handleNavigateToEvacuation()}>
+              대피 안내
+            </Button>
           )}
         </Animated.View>
         <BottomSheet
@@ -443,6 +445,7 @@ const style = StyleSheet.create({
     right: 10,
     alignSelf: 'flex-end',
     alignItems: 'flex-end',
+    gap: 10,
   },
   fireMapButton: {
     marginBottom: 10,
