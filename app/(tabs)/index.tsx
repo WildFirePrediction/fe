@@ -145,7 +145,7 @@ const WildFireMapScreen = () => {
             },
           }}
         >
-          <FireAreaOverlay />
+          <FireAreaOverlay mapRef={mapRef} />
         </NaverMapView>
         {isFireOccur && (
           <View style={style.alertPopup}>

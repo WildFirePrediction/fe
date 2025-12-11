@@ -60,7 +60,7 @@ const EvacuationRoute = () => {
     setMyLocation({
       latitude: startLat,
       longitude: startLon,
-      zoom: 15,
+      zoom: 14,
     });
 
     postRoute.mutate(
@@ -203,6 +203,7 @@ const EvacuationRoute = () => {
                 outlineWidth={2}
                 outlineColor={theme.color.white}
                 zIndex={1}
+                globalZIndex={140000}
               />
             )}
             {route && (
@@ -213,6 +214,7 @@ const EvacuationRoute = () => {
                 outlineWidth={2}
                 outlineColor={theme.color.white}
                 zIndex={10}
+                globalZIndex={150000}
               />
             )}
             {myLocation && (

@@ -1,5 +1,9 @@
 import React, { memo } from 'react';
-import { NaverMapPolygonOverlay, NaverMapMarkerOverlay } from '@mj-studio/react-native-naver-map';
+import {
+  NaverMapPolygonOverlay,
+  NaverMapMarkerOverlay,
+  NaverMapViewRef,
+} from '@mj-studio/react-native-naver-map';
 import { TimeStepMarker } from '../assets/svgs/icons';
 import {
   buildPolygonForStep,
@@ -9,13 +13,27 @@ import {
 import { fireTimestepLayerMap, fireTimestepMap } from '../constants/categories';
 import theme from '../styles/theme';
 import { useFirePrediction } from '../context/firePredictionContext';
+import { LocationCoord } from '../types/locationCoord';
 
-const FireAreaOvarlay: React.FC = () => {
+interface FireAreaOverlayProps {
+  mapRef?: React.RefObject<NaverMapViewRef | null>;
+}
+
+const FireAreaOvarlay: React.FC<FireAreaOverlayProps> = ({ mapRef }: FireAreaOverlayProps) => {
   const { firePredictionDatas } = useFirePrediction();
 
   if (!firePredictionDatas || firePredictionDatas.length === 0) {
     return null;
   }
+
+  const handleZoom = (coord: LocationCoord) => {
+    if (mapRef)
+      mapRef.current?.animateCameraTo({
+        latitude: coord.lat,
+        longitude: coord.lon,
+        zoom: 13,
+      });
+  };
 
   return (
     <>
@@ -49,10 +67,11 @@ const FireAreaOvarlay: React.FC = () => {
             <React.Fragment key={`hull-${step.timestep}`}>
               <NaverMapMarkerOverlay
                 key={`${firePredictionData.fire_id}-${step.timestep}-marker`}
-                latitude={hullCoords[0].latitude}
-                longitude={hullCoords[0].longitude}
+                latitude={hullCoords[1].latitude}
+                longitude={hullCoords[1].longitude}
                 caption={{ text: `${step.timestep * 10}분 후`, haloColor: theme.color.white }}
                 isHideCollidedCaptions={true}
+                minZoom={13}
               >
                 <TimeStepMarker />
               </NaverMapMarkerOverlay>
@@ -63,12 +82,21 @@ const FireAreaOvarlay: React.FC = () => {
                 color={fireTimestepLayerMap[step.timestep]}
                 outlineWidth={1.5}
                 outlineColor={fireTimestepMap[step.timestep]}
-                zIndex={5 - step.timestep}
+                globalZIndex={100000}
               />
             </React.Fragment>
           );
         });
       })}
+      {firePredictionDatas.map(prediction => (
+        <NaverMapMarkerOverlay
+          key={`fire=${prediction.fire_id}`}
+          latitude={prediction.fire_location.lat}
+          longitude={prediction.fire_location.lon}
+          image={{ symbol: 'red' }}
+          onTap={() => handleZoom(prediction.fire_location)}
+        />
+      ))}
     </>
   );
 };
