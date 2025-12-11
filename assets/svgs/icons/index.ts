@@ -26,6 +26,7 @@ import DownArrow from './DownArrow.svg';
 import TimeStepMarker from './TimeStepMarker.svg';
 import Flame from './Flame.svg';
 import BubbleTailBorder from './BubbleTailBorder.svg';
+import Earthquake from './Earthquake.svg';
 
 export { NavigationArrow };
 export { Setting as SettingIcon };
@@ -55,3 +56,4 @@ export { DownArrow as DownArrowIcon };
 export { TimeStepMarker };
 export { Flame as FlameIcon };
 export { BubbleTailBorder };
+export { Earthquake as EarthquakeIcon };
