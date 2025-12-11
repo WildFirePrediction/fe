@@ -15,6 +15,7 @@ import { useFirePrediction } from '../../context/firePredictionContext';
 import useGetUserPreference from '../../apis/hooks/useGetUserPreference';
 import { RegionResponse } from '../../apis/types/region';
 import { useLocation } from '../../context/locationContext';
+import useGetRegionDisasters from '../../apis/hooks/useGetRegionDisasters';
 
 const WildFireMapScreen = () => {
   const router = useRouter();
@@ -33,6 +34,7 @@ const WildFireMapScreen = () => {
 
   const { firePredictionDatas } = useFirePrediction();
   const { data: myRegionData } = useGetUserPreference();
+  const { data: regionDisaster } = useGetRegionDisasters(selectedRegion?.id);
 
   const { currentLocation, setCurrentLocation } = useLocation();
 
@@ -201,7 +203,7 @@ const WildFireMapScreen = () => {
             <View style={style.bottomSheetBody}>
               {myRegionData && myRegionData.length > 0 && (
                 <>
-                  <View style={style.bottomSheetSection}>
+                  {/* <View style={style.bottomSheetSection}>
                     <Text style={style.bottomSheetSectionLabel}>기상 특보</Text>
                     <TouchableOpacity
                       style={style.bottomSheetWeatherReport}
@@ -236,47 +238,53 @@ const WildFireMapScreen = () => {
                         </View>
                       )}
                     </TouchableOpacity>
-                  </View>
+                  </View> */}
                   <View style={style.bottomSheetSection}>
                     <Text style={style.bottomSheetSectionLabel}>재난 문자</Text>
-                    {disasterTextData.map(item => (
-                      <TouchableOpacity
-                        key={item.id}
-                        style={style.bottomSheetMessageContainer}
-                        onPress={() => handleToggleMessage(item.id)}
-                        activeOpacity={1}
-                      >
-                        <View style={style.bottomSheetWeatherReportTitle}>
-                          <View
-                            style={{
-                              ...style.bottomSheetMessageBadge,
-                              backgroundColor: theme.color.rain,
-                            }}
-                          >
-                            <RainIcon
-                              width={18}
-                              height={18}
-                              style={style.bottomSheetMessageBadgeIcon}
-                            />
-                            <Text style={style.bottomSheetMessageBadgeText}>호우</Text>
+                    {regionDisaster && regionDisaster.emergencyMessages.length > 0 ? (
+                      regionDisaster.emergencyMessages.map(item => (
+                        <TouchableOpacity
+                          key={item.id}
+                          style={style.bottomSheetMessageContainer}
+                          onPress={() => handleToggleMessage(item.id)}
+                          activeOpacity={1}
+                        >
+                          <View style={style.bottomSheetWeatherReportTitle}>
+                            <View
+                              style={{
+                                ...style.bottomSheetMessageBadge,
+                                backgroundColor: theme.color.rain,
+                              }}
+                            >
+                              <RainIcon
+                                width={18}
+                                height={18}
+                                style={style.bottomSheetMessageBadgeIcon}
+                              />
+                              <Text style={style.bottomSheetMessageBadgeText}>
+                                {item.disasterTypeName}
+                              </Text>
+                            </View>
+                            <Text style={style.bottomSheetMessageTitleText}>{item.regionName}</Text>
+                            <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
                           </View>
-                          <Text style={style.bottomSheetMessageTitleText}>횡성</Text>
-                          <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
-                        </View>
-                        {isMessageOpen[item.id] && (
-                          <>
-                            <Text style={style.bottomSheetWeatherReportTimeText}>
-                              2025.11.22 22:55
-                            </Text>
-                            <Text style={style.bottomSheetMessageText}>
-                              오늘 16시 30분 호우주의보 발효. 개울가 하천 계곡 등 야영객은 안전한
-                              장소로 대피하여 주시고 시설물 관리 및 안전사고에 유의하여 주시기
-                              바랍니다{' '}
-                            </Text>
-                          </>
-                        )}
-                      </TouchableOpacity>
-                    ))}
+                          {isMessageOpen[item.id] && (
+                            <>
+                              <Text style={style.bottomSheetWeatherReportTimeText}>
+                                {item.regDate}
+                              </Text>
+                              <Text style={style.bottomSheetMessageText}>
+                                {item.messageContent}{' '}
+                              </Text>
+                            </>
+                          )}
+                        </TouchableOpacity>
+                      ))
+                    ) : (
+                      <View style={style.noDataContainer}>
+                        <Text style={style.noDataText}>재난 문자가 없습니다</Text>
+                      </View>
+                    )}
                   </View>
                 </>
               )}
