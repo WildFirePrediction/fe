@@ -4,7 +4,7 @@ import {
   NaverMapMarkerOverlay,
   NaverMapViewRef,
 } from '@mj-studio/react-native-naver-map';
-import { TimeStepMarker } from '../assets/svgs/icons';
+import { FlameIcon, TimeStepMarker } from '../assets/svgs/icons';
 import {
   buildPolygonForStep,
   buildSquarePolygonForCell,
@@ -93,9 +93,10 @@ const FireAreaOvarlay: React.FC<FireAreaOverlayProps> = ({ mapRef }: FireAreaOve
           key={`fire=${prediction.fire_id}`}
           latitude={prediction.fire_location.lat}
           longitude={prediction.fire_location.lon}
-          image={{ symbol: 'red' }}
           onTap={() => handleZoom(prediction.fire_location)}
-        />
+        >
+          <FlameIcon width={30} height={30} />
+        </NaverMapMarkerOverlay>
       ))}
     </>
   );

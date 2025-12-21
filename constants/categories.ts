@@ -43,8 +43,8 @@ export const fireTimestepMap: Record<number, string> = {
 
 export const fireTimestepLayerMap: Record<number, string> = {
   1: theme.color.fireLayer1,
-  2: theme.color.fireLayer2,
-  3: theme.color.fireLayer3,
+  2: theme.color.fireLayer3,
+  3: theme.color.fireLayer4,
   4: theme.color.fireLayer4,
   5: theme.color.fireLayer5,
 };
