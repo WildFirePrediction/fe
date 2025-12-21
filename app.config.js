@@ -5,19 +5,19 @@ if (!process.env.NAVER_CLIENT_ID) {
 
 export default {
   expo: {
-    name: 'CAPSTONE25-FE',
+    name: '안전 나침반',
     slug: 'CAPSTONE25-FE',
     version: '1.0.0',
     platforms: ['ios', 'android'],
     orientation: 'portrait',
-    icon: './assets/icon.png',
+    icon: './assets/pngs/icon.png',
     userInterfaceStyle: 'light',
     newArchEnabled: true,
     scheme: 'capstone25fe',
     splash: {
-      image: './assets/splash-icon.png',
+      image: './assets/pngs/splashText.png',
       resizeMode: 'contain',
-      backgroundColor: '#ffffff',
+      backgroundColor: '#FF7451',
     },
     ios: {
       supportsTablet: true,
