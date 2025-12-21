@@ -10,7 +10,6 @@ import theme from '../../styles/theme';
 import { AlertBellIcon, BubbleTail, DownArrowIcon, RainIcon } from '../../assets/svgs/icons';
 import { useRouter } from 'expo-router';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { disasterTextData } from '../../mock/disasterTextData';
 import { useFirePrediction } from '../../context/firePredictionContext';
 import useGetUserPreference from '../../apis/hooks/useGetUserPreference';
 import { RegionResponse } from '../../apis/types/region';
@@ -121,8 +120,11 @@ const WildFireMapScreen = () => {
   }, [myRegionData]);
 
   useEffect(() => {
-    setIsMessageOpen(Object.fromEntries(disasterTextData.map(item => [item.id, false])));
-  }, [disasterTextData]);
+    if (regionDisaster)
+      setIsMessageOpen(
+        Object.fromEntries(regionDisaster?.emergencyMessages.map(item => [item.id, false])),
+      );
+  }, [regionDisaster]);
 
   useEffect(() => {
     if (firePredictionDatas.length > 0) {
