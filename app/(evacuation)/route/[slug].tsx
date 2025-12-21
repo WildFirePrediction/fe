@@ -61,7 +61,7 @@ const EvacuationRoute = () => {
     setMyLocation({
       latitude: startLat,
       longitude: startLon,
-      zoom: 14,
+      zoom: 15,
     });
 
     postRoute.mutate(
@@ -85,6 +85,7 @@ const EvacuationRoute = () => {
             setMyLocation({
               latitude: startLat,
               longitude: startLon,
+              zoom: 15,
             });
           }
         },
