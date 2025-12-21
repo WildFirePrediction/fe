@@ -26,6 +26,7 @@ const WildFireMapScreen = () => {
   const [isWeatherReportOpen, setIsWeatherReportOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState<Record<number, boolean>>({});
   const [isFireOccur, setIsFireOccur] = useState(false);
+  const [showFireAlert, setShowFireAlert] = useState(false);
   const bottomSheetPosition = useSharedValue<number>(0);
 
   const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
@@ -127,6 +128,11 @@ const WildFireMapScreen = () => {
     if (firePredictionDatas.length > 0) {
       setIsFireOccur(true);
     }
+    setShowFireAlert(true);
+    const fireAlertTimer = setTimeout(() => {
+      setShowFireAlert(false);
+    }, 5000);
+    return () => clearTimeout(fireAlertTimer);
   }, [firePredictionDatas]);
 
   return (
@@ -149,7 +155,7 @@ const WildFireMapScreen = () => {
         >
           <FireAreaOverlay mapRef={mapRef} />
         </NaverMapView>
-        {isFireOccur && (
+        {showFireAlert && (
           <View style={style.alertPopup}>
             <AlertBellIcon style={style.alertPopupIcon} />
             <Text style={style.alertPopupText}>산불이 발생했습니다. 발생 지역을 확인하세요</Text>
@@ -205,42 +211,47 @@ const WildFireMapScreen = () => {
             <View style={style.bottomSheetBody}>
               {myRegionData && myRegionData.length > 0 && (
                 <>
-                  {/* <View style={style.bottomSheetSection}>
+                  <View style={style.bottomSheetSection}>
                     <Text style={style.bottomSheetSectionLabel}>기상 특보</Text>
-                    <TouchableOpacity
-                      style={style.bottomSheetWeatherReport}
-                      onPress={handleToggleWeatherReport}
-                      activeOpacity={1}
-                    >
-                      <View style={style.bottomSheetWeatherReportTitle}>
-                        <AlertBellIcon style={style.bottomSheetWeatherReportTitleIcon} />
-                        <Text style={style.bottomSheetWeatherReportTitleText}>
-                          <Text style={style.bottomSheetWeatherReportTitleHightlightText}>
-                            건조주의보
-                          </Text>{' '}
-                          발효 중
-                        </Text>
-                        <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
-                      </View>
-                      {isWeatherReportOpen && (
-                        <View style={style.bottomSheetWeatherReportContent}>
-                          <View style={style.bottomSheetWeatherReportTimeContainer}>
-                            <Text style={style.bottomSheetWeatherReportTimeText}>
-                              발표 2025.11.17 11:00
+                    {regionDisaster && regionDisaster.weatherWarnings.length > 0 && (
+                      <TouchableOpacity
+                        style={style.bottomSheetWeatherReport}
+                        onPress={handleToggleWeatherReport}
+                        activeOpacity={1}
+                      >
+                        <View style={style.bottomSheetWeatherReportTitle}>
+                          <AlertBellIcon style={style.bottomSheetWeatherReportTitleIcon} />
+                          <Text style={style.bottomSheetWeatherReportTitleText}>
+                            <Text style={style.bottomSheetWeatherReportTitleHightlightText}>
+                              {regionDisaster.weatherWarnings[0].title}
                             </Text>
-                            <Text style={style.bottomSheetWeatherReportTimeText}>
-                              발효 2025.11.17 11:00
+                          </Text>
+                          <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
+                        </View>
+                        {isWeatherReportOpen && (
+                          <View style={style.bottomSheetWeatherReportContent}>
+                            <View style={style.bottomSheetWeatherReportTimeContainer}>
+                              <Text style={style.bottomSheetWeatherReportTimeText}>
+                                발표 {regionDisaster.weatherWarnings[0].maasObtainedAtRaw}
+                              </Text>
+                              <Text style={style.bottomSheetWeatherReportTimeText}>
+                                발효 {regionDisaster.weatherWarnings[0].effectiveStatusTimeRaw}
+                              </Text>
+                            </View>
+
+                            <Text style={style.bottomSheetWeatherReportRegions}>
+                              {regionDisaster.weatherWarnings[0].relevantZone}
                             </Text>
                           </View>
-
-                          <Text style={style.bottomSheetWeatherReportRegions}>
-                            강원 북부 산지, 강원중부산지, 강원 남부산지, 영덕, 울진평지, 포항,
-                            경북북동산지
-                          </Text>
-                        </View>
-                      )}
-                    </TouchableOpacity>
-                  </View> */}
+                        )}
+                      </TouchableOpacity>
+                    )}
+                    {regionDisaster && regionDisaster.weatherWarnings.length === 0 && (
+                      <View style={style.noDataContainer}>
+                        <Text style={style.noDataText}>기상 특보가 없습니다</Text>
+                      </View>
+                    )}
+                  </View>
                   <View style={style.bottomSheetSection}>
                     <Text style={style.bottomSheetSectionLabel}>재난 문자</Text>
                     {regionDisaster && regionDisaster.emergencyMessages.length > 0 ? (
@@ -252,7 +263,7 @@ const WildFireMapScreen = () => {
                           activeOpacity={1}
                         >
                           <View style={style.bottomSheetWeatherReportTitle}>
-                            <View
+                            {/* <View
                               style={{
                                 ...style.bottomSheetMessageBadge,
                                 backgroundColor: theme.color.rain,
@@ -266,7 +277,7 @@ const WildFireMapScreen = () => {
                               <Text style={style.bottomSheetMessageBadgeText}>
                                 {item.disasterTypeName}
                               </Text>
-                            </View>
+                            </View> */}
                             <Text style={style.bottomSheetMessageTitleText}>{item.regionName}</Text>
                             <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
                           </View>
@@ -463,7 +474,7 @@ const style = StyleSheet.create({
     borderRadius: 25,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: theme.color.point,
+    backgroundColor: theme.color.fire,
     alignItems: 'center',
     shadowColor: theme.color.black,
     shadowOpacity: 0.25,
