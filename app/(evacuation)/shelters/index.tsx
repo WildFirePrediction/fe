@@ -20,6 +20,7 @@ import { FullCoord, FullCoordWithName } from '../../../types/locationCoord';
 import useGetSheltersNearby from '../../../apis/hooks/useGetSheltersNearby';
 import { ShelterData } from '../../../apis/types/shelter';
 import { firePredictionData } from '../../../mock/firePredictionData';
+import { useLocation } from '../../../context/locationContext';
 
 const sortOptions = ['거리순', '수용인원순'];
 
@@ -40,6 +41,8 @@ const Shelters = () => {
     hasNextPage: hasMoreShelters,
   } = useGetSheltersNearby(myLocation?.latitude, myLocation?.longitude);
   const [shelters, setShelters] = useState<ShelterData[] | null>(null);
+
+  const { currentLocation } = useLocation();
 
   const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
     top: bottomSheetPosition.value - 80,
@@ -73,10 +76,15 @@ const Shelters = () => {
 
   const moveToCurrentLocation = async () => {
     try {
-      const position = await Location.getCurrentPositionAsync();
+      // const position = await Location.getCurrentPositionAsync();
+      // mapRef.current?.animateCameraTo({
+      //   latitude: position.coords.latitude,
+      //   longitude: position.coords.longitude,
+      //   zoom: 14,
+      // });
       mapRef.current?.animateCameraTo({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
         zoom: 14,
       });
     } catch (error) {
@@ -92,20 +100,24 @@ const Shelters = () => {
       if (resultShelters.length > 0) {
         setCamera({
           ...resultShelters[0],
-          zoom: 14,
+          zoom: 13,
         });
       }
     }
   }, [sheltersResponsePages]);
 
   useEffect(() => {
-    mapRef.current?.setLocationTrackingMode('NoFollow');
+    // mapRef.current?.setLocationTrackingMode('NoFollow');
     // 내위치 설정-> GET api 호출
     (async () => {
-      const currentLocation = await Location.getCurrentPositionAsync();
+      // const currentLocation = await Location.getCurrentPositionAsync();
+      // setMyLocation({
+      //   latitude: currentLocation.coords.latitude,
+      //   longitude: currentLocation.coords.longitude,
+      // });
       setMyLocation({
-        latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude,
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
       });
     })();
   }, []);
@@ -120,9 +132,16 @@ const Shelters = () => {
             isShowLocationButton={false}
             camera={camera}
             isShowCompass={false}
-            locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
+            locationOverlay={{
+              isVisible: true,
+              anchor: { x: 0.5, y: 0.5 },
+              position: {
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+              },
+            }}
           >
-            <FireAreaOverlay firePredictionData={firePredictionData} />
+            <FireAreaOverlay />
             {shelters &&
               shelters.map((shelter, index) => (
                 <NaverMapMarkerOverlay
@@ -193,10 +212,10 @@ const Shelters = () => {
           >
             <BottomSheetScrollView style={style.bottomSheetView}>
               <View style={style.bottomSheetOptionContainer}>
-                <Pressable style={style.sortContainer} onPress={() => setSortModalOpen(true)}>
+                {/* <Pressable style={style.sortContainer} onPress={() => setSortModalOpen(true)}>
                   <Text style={style.sortText}>{sortType}</Text>
                   <SortArrowDownIcon style={style.sortArrowIconStyle} />
-                </Pressable>
+                </Pressable> */}
                 <Text style={style.numberOfSheltersText}>주변 대피소 {shelters?.length}개</Text>
               </View>
               <View style={style.bottomSheetListContainer}>
@@ -226,14 +245,6 @@ const Shelters = () => {
                       <View style={style.listItemDetailContainer}>
                         <Text style={style.listItemmTypeText}>{shelter.shelterTypeName}</Text>
                         <View style={style.listItemButtonContainer}>
-                          <Button
-                            buttonType="action"
-                            colorStyle="white"
-                            onClick={handleShelterInfo}
-                            customStyle={{ alignSelf: 'auto' }}
-                          >
-                            대피소 정보
-                          </Button>
                           <TouchableOpacity
                             style={style.listItemStartButton}
                             activeOpacity={0.5}
@@ -277,7 +288,8 @@ const style = StyleSheet.create({
   },
   bottomSheetOptionContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'flex-end',
+    width: '100%',
   },
   sortContainer: {
     flexDirection: 'row',
@@ -295,7 +307,8 @@ const style = StyleSheet.create({
   numberOfSheltersText: {
     fontSize: 16,
     color: theme.color.darkGray1,
-    marginEnd: 20,
+    marginStart: 20,
+    alignSelf: 'flex-end',
   },
   bottomSheetListContainer: {
     gap: 10,

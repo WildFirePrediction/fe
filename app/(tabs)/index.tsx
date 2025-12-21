@@ -8,33 +8,38 @@ import * as Location from 'expo-location';
 import { Camera, NaverMapView, NaverMapViewRef } from '@mj-studio/react-native-naver-map';
 import theme from '../../styles/theme';
 import { AlertBellIcon, BubbleTail, DownArrowIcon, RainIcon } from '../../assets/svgs/icons';
-import { myRegionData } from '../../mock/myRegionsData';
 import { useRouter } from 'expo-router';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { disasterTextData } from '../../mock/disasterTextData';
-import { firePredictionData } from '../../mock/firePredictionData';
-import { getStorageItem } from '../../utils/storageUtil';
-import { ASYNC_STORAGE_KEYS } from '../../constants/storageKey';
+import { useFirePrediction } from '../../context/firePredictionContext';
+import useGetUserPreference from '../../apis/hooks/useGetUserPreference';
+import { RegionResponse } from '../../apis/types/region';
+import { useLocation } from '../../context/locationContext';
+import useGetRegionDisasters from '../../apis/hooks/useGetRegionDisasters';
 
 const WildFireMapScreen = () => {
   const router = useRouter();
   const mapRef = useRef<NaverMapViewRef>(null);
 
-  const [selectedRegion, setSelectedRegion] = useState(myRegionData.at(0));
-  const [camera, setCamera] = useState<Camera | undefined>(myRegionData.at(0));
+  const [selectedRegion, setSelectedRegion] = useState<RegionResponse | null>(null);
+  const [camera, setCamera] = useState<Camera | undefined>(undefined);
   const [isWeatherReportOpen, setIsWeatherReportOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState<Record<number, boolean>>({});
-  const [isFireOccur, setIsFireOccur] = useState(true);
+  const [isFireOccur, setIsFireOccur] = useState(false);
+  const [showFireAlert, setShowFireAlert] = useState(false);
   const bottomSheetPosition = useSharedValue<number>(0);
 
   const floatingButtonsAnimatedStyle = useAnimatedStyle(() => ({
-    top: bottomSheetPosition.value - (isFireOccur ? 190 : 70),
+    top: bottomSheetPosition.value - (isFireOccur ? 140 : 70),
   }));
 
-  const handleSelectRegion = (regionName: string) => {
-    const region = myRegionData.find(myRegion => myRegion.name === regionName);
+  const { firePredictionDatas } = useFirePrediction();
+  const { data: myRegionData } = useGetUserPreference();
+  const { data: regionDisaster } = useGetRegionDisasters(selectedRegion?.id);
+
+  const { currentLocation, setCurrentLocation } = useLocation();
+
+  const handleSelectRegion = (region: RegionResponse) => {
     setSelectedRegion(region);
-    setCamera(region ? { ...region, zoom: 13.5 } : region);
   };
 
   const handleSetRegion = () => {
@@ -55,11 +60,16 @@ const WildFireMapScreen = () => {
 
   const moveToCurrentLocation = async () => {
     try {
-      const position = await Location.getCurrentPositionAsync();
+      // const position = await Location.getCurrentPositionAsync();
 
+      // mapRef.current?.animateCameraTo({
+      //   latitude: position.coords.latitude,
+      //   longitude: position.coords.longitude,
+      //   zoom: 13.5,
+      // });
       mapRef.current?.animateCameraTo({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
         zoom: 13.5,
       });
     } catch (error) {
@@ -68,11 +78,13 @@ const WildFireMapScreen = () => {
   };
 
   const moveToFire = () => {
-    mapRef.current?.animateCameraTo({
-      latitude: firePredictionData.fire_location.lat,
-      longitude: firePredictionData.fire_location.lon,
-      zoom: 13.5,
-    });
+    if (firePredictionDatas.length > 0) {
+      mapRef.current?.animateCameraTo({
+        latitude: firePredictionDatas[0].fire_location.lat,
+        longitude: firePredictionDatas[0].fire_location.lon,
+        zoom: 13.5,
+      });
+    }
   };
 
   useEffect(() => {
@@ -81,15 +93,19 @@ const WildFireMapScreen = () => {
         const { granted } = await Location.requestForegroundPermissionsAsync();
         if (granted) {
           await Location.requestBackgroundPermissionsAsync();
-          mapRef.current?.setLocationTrackingMode('NoFollow');
-          setCamera(selectedRegion ? { ...selectedRegion, zoom: 13.5 } : selectedRegion);
+          // mapRef.current?.setLocationTrackingMode('NoFollow');
 
-          const myRegions = await getStorageItem<string[]>(ASYNC_STORAGE_KEYS.MY_REGIONS);
-          if (myRegions === null) {
-            const currentLocation = await Location.getCurrentPositionAsync();
-            // TODO: 백엔드에 내 지역 POST
-            // TODO: AsyncStorage에 지역 저장
-          }
+          // const currentPosition = await Location.getCurrentPositionAsync();
+          // setCamera({
+          //   latitude: currentPosition.coords.latitude,
+          //   longitude: currentPosition.coords.longitude,
+          //   zoom: 13.5,
+          // });
+          setCamera({
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
+            zoom: 13.5,
+          });
         }
       } catch (e) {
         console.error(`Location request has been failed: ${e}`);
@@ -98,8 +114,28 @@ const WildFireMapScreen = () => {
   }, []);
 
   useEffect(() => {
-    setIsMessageOpen(Object.fromEntries(disasterTextData.map(item => [item.id, false])));
-  }, [disasterTextData]);
+    if (myRegionData && myRegionData.length > 0) {
+      setSelectedRegion(myRegionData[0]);
+    }
+  }, [myRegionData]);
+
+  useEffect(() => {
+    if (regionDisaster)
+      setIsMessageOpen(
+        Object.fromEntries(regionDisaster?.emergencyMessages.map(item => [item.id, false])),
+      );
+  }, [regionDisaster]);
+
+  useEffect(() => {
+    if (firePredictionDatas.length > 0) {
+      setIsFireOccur(true);
+    }
+    setShowFireAlert(true);
+    const fireAlertTimer = setTimeout(() => {
+      setShowFireAlert(false);
+    }, 5000);
+    return () => clearTimeout(fireAlertTimer);
+  }, [firePredictionDatas]);
 
   return (
     <GestureHandlerRootView>
@@ -110,22 +146,29 @@ const WildFireMapScreen = () => {
           camera={camera}
           isShowZoomControls={false}
           isShowLocationButton={false}
-          locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
+          locationOverlay={{
+            isVisible: true,
+            anchor: { x: 0.5, y: 0.5 },
+            position: {
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude,
+            },
+          }}
         >
-          <FireAreaOverlay firePredictionData={firePredictionData} />
+          <FireAreaOverlay mapRef={mapRef} />
         </NaverMapView>
-        {isFireOccur && (
+        {showFireAlert && (
           <View style={style.alertPopup}>
             <AlertBellIcon style={style.alertPopupIcon} />
-            <Text style={style.alertPopupText}>산불이 발생했습니다. 신속하게 대피하세요</Text>
+            <Text style={style.alertPopupText}>산불이 발생했습니다. 발생 지역을 확인하세요</Text>
           </View>
         )}
         <Animated.View style={[style.floatingButtonsContainer, floatingButtonsAnimatedStyle]}>
-          {isFireOccur && (
+          {/* {isFireOccur && (
             <MapButton type="fire" customStyle={style.fireMapButton} onClick={moveToFire} />
-          )}
+          )} */}
           <MapButton onClick={moveToCurrentLocation} />
-          {isFireOccur && (
+          {/* {isFireOccur && (
             <View style={style.navigationButtonContainer}>
               <View style={style.popupBubbleContainer}>
                 <View style={style.popupBubble}>
@@ -133,10 +176,12 @@ const WildFireMapScreen = () => {
                 </View>
                 <BubbleTail style={style.popupBubbleTail} />
               </View>
-              <Button buttonType="floating" onClick={() => handleNavigateToEvacuation()}>
-                대피 안내
-              </Button>
             </View>
+          )}{' '} */}
+          {isFireOccur && (
+            <Button buttonType="floating" onClick={() => handleNavigateToEvacuation()}>
+              대피 안내
+            </Button>
           )}
         </Animated.View>
         <BottomSheet
@@ -147,15 +192,16 @@ const WildFireMapScreen = () => {
         >
           <BottomSheetView style={style.bottomSheetView}>
             <View style={style.bottomSheetRegionButtonsContainer}>
-              {myRegionData.map(myRegion => (
-                <SelectionButton
-                  key={myRegion.name}
-                  selected={selectedRegion?.name === myRegion.name}
-                  onClick={handleSelectRegion}
-                >
-                  {myRegion.name}
-                </SelectionButton>
-              ))}
+              {myRegionData &&
+                myRegionData.map(myRegion => (
+                  <SelectionButton
+                    key={myRegion.eupmyeondong}
+                    selected={selectedRegion?.eupmyeondong === myRegion.eupmyeondong}
+                    onClick={() => handleSelectRegion(myRegion)}
+                  >
+                    {myRegion.eupmyeondong}
+                  </SelectionButton>
+                ))}
               <Button
                 buttonType="setting"
                 onClick={handleSetRegion}
@@ -165,80 +211,103 @@ const WildFireMapScreen = () => {
               </Button>
             </View>
             <View style={style.bottomSheetBody}>
-              <View style={style.bottomSheetSection}>
-                <Text style={style.bottomSheetSectionLabel}>기상 특보</Text>
-                <TouchableOpacity
-                  style={style.bottomSheetWeatherReport}
-                  onPress={handleToggleWeatherReport}
-                  activeOpacity={1}
-                >
-                  <View style={style.bottomSheetWeatherReportTitle}>
-                    <AlertBellIcon style={style.bottomSheetWeatherReportTitleIcon} />
-                    <Text style={style.bottomSheetWeatherReportTitleText}>
-                      <Text style={style.bottomSheetWeatherReportTitleHightlightText}>
-                        건조주의보
-                      </Text>{' '}
-                      발효 중
-                    </Text>
-                    <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
-                  </View>
-                  {isWeatherReportOpen && (
-                    <View style={style.bottomSheetWeatherReportContent}>
-                      <View style={style.bottomSheetWeatherReportTimeContainer}>
-                        <Text style={style.bottomSheetWeatherReportTimeText}>
-                          발표 2025.11.17 11:00
-                        </Text>
-                        <Text style={style.bottomSheetWeatherReportTimeText}>
-                          발효 2025.11.17 11:00
-                        </Text>
-                      </View>
-
-                      <Text style={style.bottomSheetWeatherReportRegions}>
-                        강원 북부 산지, 강원중부산지, 강원 남부산지, 영덕, 울진평지, 포항,
-                        경북북동산지
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              </View>
-              <View style={style.bottomSheetSection}>
-                <Text style={style.bottomSheetSectionLabel}>재난 문자</Text>
-                {disasterTextData.map(item => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={style.bottomSheetMessageContainer}
-                    onPress={() => handleToggleMessage(item.id)}
-                    activeOpacity={1}
-                  >
-                    <View style={style.bottomSheetWeatherReportTitle}>
-                      <View
-                        style={{
-                          ...style.bottomSheetMessageBadge,
-                          backgroundColor: theme.color.rain,
-                        }}
+              {myRegionData && myRegionData.length > 0 && (
+                <>
+                  <View style={style.bottomSheetSection}>
+                    <Text style={style.bottomSheetSectionLabel}>기상 특보</Text>
+                    {regionDisaster && regionDisaster.weatherWarnings.length > 0 && (
+                      <TouchableOpacity
+                        style={style.bottomSheetWeatherReport}
+                        onPress={handleToggleWeatherReport}
+                        activeOpacity={1}
                       >
-                        <RainIcon
-                          width={18}
-                          height={18}
-                          style={style.bottomSheetMessageBadgeIcon}
-                        />
-                        <Text style={style.bottomSheetMessageBadgeText}>호우</Text>
-                      </View>
-                      <Text style={style.bottomSheetMessageTitleText}>횡성</Text>
-                      <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
-                    </View>
-                    {isMessageOpen[item.id] && (
-                      <>
-                        <Text style={style.bottomSheetWeatherReportTimeText}>2025.11.22 22:55</Text>
-                        <Text style={style.bottomSheetMessageText}>
-                          오늘 16시 30분 호우주의보 발효. 개울가 하천 계곡 등 야영객은 안전한 장소로
-                          대피하여 주시고 시설물 관리 및 안전사고에 유의하여 주시기 바랍니다{' '}
-                        </Text>
-                      </>
+                        <View style={style.bottomSheetWeatherReportTitle}>
+                          <AlertBellIcon style={style.bottomSheetWeatherReportTitleIcon} />
+                          <Text style={style.bottomSheetWeatherReportTitleText}>
+                            <Text style={style.bottomSheetWeatherReportTitleHightlightText}>
+                              {regionDisaster.weatherWarnings[0].title}
+                            </Text>
+                          </Text>
+                          <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
+                        </View>
+                        {isWeatherReportOpen && (
+                          <View style={style.bottomSheetWeatherReportContent}>
+                            <View style={style.bottomSheetWeatherReportTimeContainer}>
+                              <Text style={style.bottomSheetWeatherReportTimeText}>
+                                발표 {regionDisaster.weatherWarnings[0].maasObtainedAtRaw}
+                              </Text>
+                              <Text style={style.bottomSheetWeatherReportTimeText}>
+                                발효 {regionDisaster.weatherWarnings[0].effectiveStatusTimeRaw}
+                              </Text>
+                            </View>
+
+                            <Text style={style.bottomSheetWeatherReportRegions}>
+                              {regionDisaster.weatherWarnings[0].relevantZone}
+                            </Text>
+                          </View>
+                        )}
+                      </TouchableOpacity>
                     )}
-                  </TouchableOpacity>
-                ))}
-              </View>
+                    {regionDisaster && regionDisaster.weatherWarnings.length === 0 && (
+                      <View style={style.noDataContainer}>
+                        <Text style={style.noDataText}>기상 특보가 없습니다</Text>
+                      </View>
+                    )}
+                  </View>
+                  <View style={style.bottomSheetSection}>
+                    <Text style={style.bottomSheetSectionLabel}>재난 문자</Text>
+                    {regionDisaster && regionDisaster.emergencyMessages.length > 0 ? (
+                      regionDisaster.emergencyMessages.map(item => (
+                        <TouchableOpacity
+                          key={item.id}
+                          style={style.bottomSheetMessageContainer}
+                          onPress={() => handleToggleMessage(item.id)}
+                          activeOpacity={1}
+                        >
+                          <View style={style.bottomSheetWeatherReportTitle}>
+                            {/* <View
+                              style={{
+                                ...style.bottomSheetMessageBadge,
+                                backgroundColor: theme.color.rain,
+                              }}
+                            >
+                              <RainIcon
+                                width={18}
+                                height={18}
+                                style={style.bottomSheetMessageBadgeIcon}
+                              />
+                              <Text style={style.bottomSheetMessageBadgeText}>
+                                {item.disasterTypeName}
+                              </Text>
+                            </View> */}
+                            <Text style={style.bottomSheetMessageTitleText}>{item.regionName}</Text>
+                            <DownArrowIcon style={style.bottomSheetWeatherReportArrowIcon} />
+                          </View>
+                          {isMessageOpen[item.id] && (
+                            <>
+                              <Text style={style.bottomSheetWeatherReportTimeText}>
+                                {item.regDate}
+                              </Text>
+                              <Text style={style.bottomSheetMessageText}>
+                                {item.messageContent}{' '}
+                              </Text>
+                            </>
+                          )}
+                        </TouchableOpacity>
+                      ))
+                    ) : (
+                      <View style={style.noDataContainer}>
+                        <Text style={style.noDataText}>재난 문자가 없습니다</Text>
+                      </View>
+                    )}
+                  </View>
+                </>
+              )}
+              {myRegionData && myRegionData.length === 0 && (
+                <View style={style.noDataContainer}>
+                  <Text style={style.noDataText}>내 지역을 설정하고 재난 정보를 확인하세요!</Text>
+                </View>
+              )}
             </View>
           </BottomSheetView>
         </BottomSheet>
@@ -389,6 +458,7 @@ const style = StyleSheet.create({
     right: 10,
     alignSelf: 'flex-end',
     alignItems: 'flex-end',
+    gap: 10,
   },
   fireMapButton: {
     marginBottom: 10,
@@ -406,7 +476,7 @@ const style = StyleSheet.create({
     borderRadius: 25,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: theme.color.point,
+    backgroundColor: theme.color.fire,
     alignItems: 'center',
     shadowColor: theme.color.black,
     shadowOpacity: 0.25,
@@ -449,5 +519,16 @@ const style = StyleSheet.create({
     marginTop: -7,
     marginEnd: 20,
     color: theme.color.darkGray2,
+  },
+  noDataContainer: {
+    width: '100%',
+    borderColor: theme.color.gray,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 10,
+  },
+  noDataText: {
+    fontSize: 15,
   },
 });

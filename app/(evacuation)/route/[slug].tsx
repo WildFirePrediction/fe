@@ -9,18 +9,18 @@ import { useRouter } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CancelIcon, WarningIcon } from '../../../assets/svgs/icons';
+import { AlertBellIcon, CancelIcon, WarningIcon } from '../../../assets/svgs/icons';
 import { useEffect, useRef, useState } from 'react';
 import theme from '../../../styles/theme';
 import * as Location from 'expo-location';
 import usePostRoutes from '../../../apis/hooks/usePostRoutes';
-import { getBearing } from '../../../utils/mapUtil';
 import { FullCoord } from '../../../types/locationCoord';
 import { useDestination } from '../../../context/destinationContext';
-import { firePredictionData } from '../../../mock/firePredictionData';
 import { Bubble, FireAreaOverlay } from '../../../components';
 import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useFirePrediction } from '../../../context/firePredictionContext';
+import { useLocation } from '../../../context/locationContext';
 
 const EvacuationRoute = () => {
   const router = useRouter();
@@ -34,12 +34,16 @@ const EvacuationRoute = () => {
   const [time, setTime] = useState(0);
   const [showAlert, setShowAlert] = useState(false);
   const [showRoutePopup, setShowRoutePopup] = useState(false);
+  const [showFireAlert, setShowFireAlert] = useState(false);
 
   const myLocationRef = useRef<Camera | undefined>(undefined);
   const routeRef = useRef<FullCoord[]>(null);
   const isFirstRoute = useRef(true);
 
   const postRoute = usePostRoutes();
+  const { firePredictionDatas } = useFirePrediction();
+
+  const { currentLocation, setCurrentLocation } = useLocation();
 
   const handleGoBack = () => {
     router.back();
@@ -48,15 +52,16 @@ const EvacuationRoute = () => {
   const setCurrentPosition = async () => {
     if (!destination) return;
 
-    const position = await Location.getCurrentPositionAsync();
-    const startLat = position.coords.latitude;
-    const startLon = position.coords.longitude;
-    const bearing = getBearing(position, destination);
+    // const position = await Location.getCurrentPositionAsync();
+    // const startLat = position.coords.latitude;
+    // const startLon = position.coords.longitude;
+    const startLat = currentLocation.latitude;
+    const startLon = currentLocation.longitude;
+
     setMyLocation({
       latitude: startLat,
       longitude: startLon,
       zoom: 15,
-      bearing: bearing,
     });
 
     postRoute.mutate(
@@ -77,6 +82,11 @@ const EvacuationRoute = () => {
                 longitude: coord[0],
               })),
             );
+            setMyLocation({
+              latitude: startLat,
+              longitude: startLon,
+              zoom: 15,
+            });
           }
         },
       },
@@ -84,34 +94,54 @@ const EvacuationRoute = () => {
   };
 
   useEffect(() => {
-    mapRef.current?.setLocationTrackingMode('Face');
+    if (!destination) return;
+    setShowFireAlert(true);
+    const fireAlertTimer = setTimeout(() => {
+      setShowFireAlert(false);
+    }, 5000);
+
+    (async () => {
+      // const position = await Location.getCurrentPositionAsync();
+      postRoute.mutate(
+        {
+          startLat: currentLocation.latitude,
+          startLon: currentLocation.longitude,
+          endLat: destination.latitude,
+          endLon: destination.longitude,
+        },
+        {
+          onSuccess: response => {
+            if (response.result) {
+              setDistance(response.result.totalDistance);
+              setTime(response.result.totalTime);
+              setPrevRoute(routeRef.current);
+              setShowRoutePopup(true);
+              const timer = setTimeout(() => {
+                if (prevRoute) {
+                  setShowRoutePopup(false);
+                }
+              }, 10000);
+              setRoute(
+                response.result.path.map(coord => ({
+                  latitude: coord[1],
+                  longitude: coord[0],
+                })),
+              );
+              return () => clearTimeout(timer);
+            }
+          },
+        },
+      );
+    })();
+    return () => clearTimeout(fireAlertTimer);
+  }, [firePredictionDatas]);
+
+  useEffect(() => {
+    // mapRef.current?.setLocationTrackingMode('Face');
 
     // 테스트용 코드 (경로 변경 상황)
     const timer = setTimeout(() => {
-      if (myLocationRef.current) {
-        postRoute.mutate(
-          {
-            startLat: myLocationRef.current.latitude,
-            startLon: myLocationRef.current.longitude,
-            endLat: 37.506038005044,
-            endLon: 126.960421779226,
-          },
-          {
-            onSuccess: response => {
-              if (response.result) {
-                setPrevRoute(routeRef.current);
-                setShowRoutePopup(true);
-                setRoute(
-                  response.result.path.map(coord => ({
-                    latitude: coord[1],
-                    longitude: coord[0],
-                  })),
-                );
-              }
-            },
-          },
-        );
-      }
+      setCurrentLocation({ latitude: 35.835499, longitude: 128.579662 });
     }, 10000);
     return () => clearTimeout(timer);
   }, []);
@@ -149,7 +179,7 @@ const EvacuationRoute = () => {
 
     const timer = setTimeout(() => {
       setShowAlert(false);
-    }, 5000);
+    }, 10000);
 
     return () => {
       clearTimeout(timer);
@@ -166,9 +196,16 @@ const EvacuationRoute = () => {
             camera={myLocation}
             isShowCompass={false}
             isShowLocationButton={false}
-            locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
+            locationOverlay={{
+              isVisible: true,
+              anchor: { x: 0.5, y: 0.5 },
+              position: {
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+              },
+            }}
           >
-            <FireAreaOverlay firePredictionData={firePredictionData} />
+            <FireAreaOverlay />
             {prevRoute && (
               <NaverMapPathOverlay
                 coords={prevRoute}
@@ -177,6 +214,7 @@ const EvacuationRoute = () => {
                 outlineWidth={2}
                 outlineColor={theme.color.white}
                 zIndex={1}
+                globalZIndex={140000}
               />
             )}
             {route && (
@@ -187,6 +225,7 @@ const EvacuationRoute = () => {
                 outlineWidth={2}
                 outlineColor={theme.color.white}
                 zIndex={10}
+                globalZIndex={150000}
               />
             )}
             {myLocation && (
@@ -212,10 +251,16 @@ const EvacuationRoute = () => {
                 latitude={route.at(-20)!.latitude}
                 longitude={route.at(-20)!.longitude}
               >
-                <Bubble text="새 경로" />
+                <Bubble text="대피 경로" />
               </NaverMapMarkerOverlay>
             )}
           </NaverMapView>
+          {showFireAlert && (
+            <View style={style.alertPopup}>
+              <AlertBellIcon style={style.alertPopupIcon} />
+              <Text style={style.alertPopupText}>산불 확산 예측 범위를 확인하세요</Text>
+            </View>
+          )}
           <CancelIcon style={style.closeIcon} onPress={handleGoBack} />
           <View style={style.routeInfoContainer}>
             <Text style={style.routeInfoDistanceText}>{distance}m</Text>
@@ -236,9 +281,11 @@ const EvacuationRoute = () => {
             >
               <View style={style.alertTextContainer}>
                 <WarningIcon style={style.warningIcon} width={20} height={20} />
-                <Text style={style.alertText}>경로가 변경되었습니다</Text>
+                <Text style={style.alertText}>최신 경로로 안내합니다</Text>
               </View>
-              <Text style={style.alertSubText}>안전한 길로 우회하여 안내합니다</Text>
+              <Text style={style.alertSubText}>
+                최신 산불 예측을 반영하여 안전한 길로 우회하여 안내합니다
+              </Text>
             </LinearGradient>
           </Animatable.View>
         </View>
@@ -354,5 +401,33 @@ const style = StyleSheet.create({
   routeInfoTimeText: {
     fontSize: 16,
     color: theme.color.darkGray2,
+  },
+  alertPopup: {
+    position: 'absolute',
+    top: 90,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: theme.color.fire,
+    alignItems: 'center',
+    shadowColor: theme.color.black,
+    shadowOpacity: 0.25,
+    shadowOffset: {
+      width: 4,
+      height: 4,
+    },
+    elevation: 5,
+  },
+  alertPopupIcon: {
+    color: theme.color.white,
+    width: 22,
+  },
+  alertPopupText: {
+    fontSize: 15,
+    color: theme.color.white,
+    fontWeight: 'bold',
   },
 });

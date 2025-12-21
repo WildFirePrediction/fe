@@ -12,23 +12,32 @@ import { useEffect, useRef, useState } from 'react';
 import { BackArrowIcon } from '../assets/svgs/icons';
 import { ScrollView } from 'react-native';
 import { disastersKor, disasterMap } from '../constants/categories';
-import { myRegionData } from '../mock/myRegionsData';
 import { MapButton, SelectionButton } from '../components';
 import { Disaster } from '../types/disaster';
 import { floodMapData } from '../mock/floodMapData';
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
+import useGetUserPreference from '../apis/hooks/useGetUserPreference';
+import { RegionResponse } from '../apis/types/region';
+import useGetDisasterInfoWildfire from '../apis/hooks/useGetDisasterInfoWildfire';
+import useGetDisasterInfoEarthquake from '../apis/hooks/useGetDisasterInfoEarthquake';
+
+const disasterCategories = ['산불', '지진'];
 
 const DisasterInfoMap = () => {
   const mapRef = useRef<NaverMapViewRef>(null);
   const [camera, setCamera] = useState<Camera>();
   const [selectedCategory, setSelectedCategory] = useState<Disaster>('WILDFIRE');
-  const [selectedRegion, setSelectedRegion] = useState(myRegionData.at(0));
+  const [selectedRegion, setSelectedRegion] = useState<RegionResponse | null>(null);
 
-  const handleSelectRegion = (regionName: string) => {
-    const region = myRegionData.find(myRegion => myRegion.name === regionName);
+  const { data: myRegions } = useGetUserPreference();
+
+  const { data: wildFireData } = useGetDisasterInfoWildfire();
+  const { data: earthquakeData } = useGetDisasterInfoEarthquake();
+
+  const handleSelectRegion = (region: RegionResponse) => {
     setSelectedRegion(region);
-    setCamera(region ? { ...region, zoom: 13.5 } : region);
+    // setCamera(region ? { ...region, zoom: 13.5 } : region);
   };
 
   const moveToCurrentLocation = async () => {
@@ -61,6 +70,12 @@ const DisasterInfoMap = () => {
     mapRef.current?.setLocationTrackingMode('NoFollow');
   }, []);
 
+  useEffect(() => {
+    if (myRegions && myRegions.length > 0) {
+      setSelectedRegion(myRegions[0]);
+    }
+  }, [myRegions]);
+
   return (
     <GestureHandlerRootView>
       <SafeAreaView style={style.screen}>
@@ -73,16 +88,30 @@ const DisasterInfoMap = () => {
             isShowCompass={false}
             locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
           >
-            {floodMapData.map((item, index) => (
-              <NaverMapMarkerOverlay
-                key={`${item.latitude}-${index}`}
-                latitude={item.latitude}
-                longitude={item.longitude}
-                image={require('../assets/pngs/floodMarker.png')}
-                caption={{ text: item.date, align: 'Top' }}
-                onTap={() => handleDisasterDetail()}
-              />
-            ))}
+            {selectedCategory === 'WILDFIRE' &&
+              wildFireData &&
+              wildFireData.wildfires.map(item => (
+                <NaverMapMarkerOverlay
+                  key={`${item.id}`}
+                  latitude={item.y}
+                  longitude={item.x}
+                  image={{ symbol: 'red' }}
+                  caption={{ text: item.ignitionDateTime.substring(0, 10), align: 'Top' }}
+                  isHideCollidedCaptions={true}
+                />
+              ))}
+            {selectedCategory === 'EARTHQUAKE' &&
+              earthquakeData &&
+              earthquakeData.earthquakes.map(item => (
+                <NaverMapMarkerOverlay
+                  key={`${item.id}`}
+                  latitude={item.latitude}
+                  longitude={item.longitude}
+                  image={{ symbol: 'green' }}
+                  caption={{ text: item.occurrenceTime.substring(0, 10), align: 'Top' }}
+                  isHideCollidedCaptions={true}
+                />
+              ))}
           </NaverMapView>
           <View style={style.headerContainer}>
             <View style={style.header}>
@@ -93,21 +122,22 @@ const DisasterInfoMap = () => {
             </View>
             <View style={style.regionSelectionContainer}>
               <ScrollView horizontal={true} bounces={false}>
-                <View style={style.regionSelectionListContainer}>
-                  {myRegionData.map((region, index) => (
-                    <SelectionButton
-                      key={`${region.name}-${index}`}
-                      selected={region.name === selectedRegion?.name}
-                      onClick={handleSelectRegion}
-                    >
-                      {region.name}
-                    </SelectionButton>
-                  ))}
-                </View>
+                {/* <View style={style.regionSelectionListContainer}>
+                  {myRegions &&
+                    myRegions.map((region, index) => (
+                      <SelectionButton
+                        key={`${region.eupmyeondong}-${index}`}
+                        selected={region.eupmyeondong === selectedRegion?.eupmyeondong}
+                        onClick={() => handleSelectRegion(region)}
+                      >
+                        {region.eupmyeondong}
+                      </SelectionButton>
+                    ))}
+                </View> */}
               </ScrollView>
             </View>
             <View style={style.categoryContainer}>
-              {disastersKor.map(category => (
+              {disasterCategories.map(category => (
                 <TouchableOpacity
                   key={category}
                   style={
@@ -164,6 +194,8 @@ const style = StyleSheet.create({
     position: 'absolute',
     fontSize: 20,
     fontWeight: 'bold',
+    marginEnd: 30,
+    marginStart: 30,
   },
   regionSelectionContainer: {
     width: '100%',

@@ -14,11 +14,10 @@ import { Button, FireAreaOverlay } from '../../../components';
 import { useEffect, useRef, useState } from 'react';
 import theme from '../../../styles/theme';
 import * as Location from 'expo-location';
-import { getBearing } from '../../../utils/mapUtil';
 import usePostRoutes from '../../../apis/hooks/usePostRoutes';
 import { FullCoord } from '../../../types/locationCoord';
 import { useDestination } from '../../../context/destinationContext';
-import { firePredictionData } from '../../../mock/firePredictionData';
+import { useLocation } from '../../../context/locationContext';
 
 const EvacuationRoutePreview = () => {
   const router = useRouter();
@@ -26,6 +25,7 @@ const EvacuationRoutePreview = () => {
   const mapRef = useRef<NaverMapViewRef>(null);
 
   const { destination } = useDestination();
+  const { currentLocation } = useLocation();
 
   const [startLocation, setStartLocation] = useState<Camera | undefined>();
   const [route, setRoute] = useState<FullCoord[] | null>(null);
@@ -45,16 +45,16 @@ const EvacuationRoutePreview = () => {
   const setCurrentPosition = async () => {
     if (!destination) return;
 
-    const position = await Location.getCurrentPositionAsync();
+    // const position = await Location.getCurrentPositionAsync();
 
-    const startLat = position.coords.latitude;
-    const startLon = position.coords.longitude;
-    const bearing = getBearing(position, destination);
+    // const startLat = position.coords.latitude;
+    // const startLon = position.coords.longitude;
+    const startLat = currentLocation.latitude;
+    const startLon = currentLocation.longitude;
     setStartLocation({
       latitude: startLat,
       longitude: startLon,
-      zoom: 15,
-      bearing: bearing,
+      zoom: 14,
     });
 
     postRoute.mutate(
@@ -82,7 +82,7 @@ const EvacuationRoutePreview = () => {
   };
 
   useEffect(() => {
-    mapRef.current?.setLocationTrackingMode('NoFollow');
+    // mapRef.current?.setLocationTrackingMode('NoFollow');
   }, []);
 
   useEffect(() => {
@@ -99,9 +99,16 @@ const EvacuationRoutePreview = () => {
             camera={startLocation}
             isShowCompass={false}
             isShowLocationButton={false}
-            locationOverlay={{ isVisible: true, anchor: { x: 0.5, y: 0.5 } }}
+            locationOverlay={{
+              isVisible: true,
+              anchor: { x: 0.5, y: 0.5 },
+              position: {
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+              },
+            }}
           >
-            <FireAreaOverlay firePredictionData={firePredictionData} />
+            <FireAreaOverlay />
             {route && (
               <NaverMapPathOverlay
                 coords={route}
@@ -109,6 +116,7 @@ const EvacuationRoutePreview = () => {
                 color={theme.color.rain}
                 outlineWidth={2}
                 outlineColor={theme.color.white}
+                globalZIndex={150000}
               />
             )}
             {startLocation && (

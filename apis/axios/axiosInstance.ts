@@ -14,7 +14,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   async config => {
     const deviceId = await getDeviceId();
-    config.headers.Authorization = deviceId;
+    (config.headers as any)['X-DEVICE-UUID'] = deviceId;
     return config;
   },
   async error => {

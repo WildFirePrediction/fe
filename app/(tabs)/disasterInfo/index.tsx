@@ -3,20 +3,24 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import theme from '../../../styles/theme';
 import {
   DustIcon,
+  EarthquakeIcon,
   FloodIcon,
   LandSlideIcon,
   MapIcon,
   SnowIcon,
   WildFireIcon,
 } from '../../../assets/svgs/icons';
-import { myRegionData } from '../../../mock/myRegionsData';
 import { Button, SelectionButton } from '../../../components';
 import { disasterInfoData } from '../../../mock/disasterInfoData';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { disastersKor, disasterMap } from '../../../constants/categories';
 import { Disaster } from '../../../types/disaster';
 import { SvgProps } from 'react-native-svg';
+import useGetUserPreference from '../../../apis/hooks/useGetUserPreference';
+import { RegionResponse } from '../../../apis/types/region';
+import useGetDisasterInfoWildfire from '../../../apis/hooks/useGetDisasterInfoWildfire';
+import useGetDisasterInfoEarthquake from '../../../apis/hooks/useGetDisasterInfoEarthquake';
 
 const iconMap: Record<Disaster, React.FC<SvgProps>> = {
   WILDFIRE: WildFireIcon,
@@ -24,12 +28,15 @@ const iconMap: Record<Disaster, React.FC<SvgProps>> = {
   FLOOD: FloodIcon,
   SNOW: SnowIcon,
   DUST: DustIcon,
+  EARTHQUAKE: EarthquakeIcon,
 };
 
 const DisasterInfoScreen = () => {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<Disaster>('WILDFIRE');
-  const [selectedRegion, setSelectedRegion] = useState(myRegionData.at(0));
+
+  const { data: wildFireData } = useGetDisasterInfoWildfire();
+  const { data: earthquakeData } = useGetDisasterInfoEarthquake();
 
   const renderIcon = (item: Disaster) => {
     const IconComponent = iconMap[item];
@@ -42,14 +49,6 @@ const DisasterInfoScreen = () => {
 
   const handleShowMap = () => {
     router.push('/disasterInfoMap');
-  };
-
-  const handleRegionSetting = () => {
-    router.push('/regionSetting');
-  };
-
-  const handleDisasterDetail = () => {
-    router.push('/disasterDetail/1');
   };
 
   return (
@@ -92,40 +91,29 @@ const DisasterInfoScreen = () => {
           />
         </View>
         <View style={style.body}>
-          <View style={style.regionOptionContainer}>
-            <ScrollView horizontal={true} bounces={false}>
-              <View style={style.regionSelectionContainer}>
-                {myRegionData.map((region, index) => (
-                  <SelectionButton
-                    key={`${region.name}-${index}`}
-                    selected={region.name === selectedRegion?.name}
-                    onClick={() => setSelectedRegion(region)}
-                  >
-                    {region.name}
-                  </SelectionButton>
-                ))}
-              </View>
-            </ScrollView>
-            <Button
-              buttonType="setting"
-              onClick={() => handleRegionSetting()}
-              customStyle={style.regionSettingButton}
-            >
-              지역 설정
-            </Button>
-          </View>
           <View style={style.resultListContainer}>
-            {disasterInfoData.map((item, index) => (
-              <TouchableOpacity
-                key={`${item.date}-${index}`}
-                style={style.resultListItem}
-                activeOpacity={1}
-                onPress={() => handleDisasterDetail()}
-              >
-                <Text style={style.resultItemDateText}>{item.date}</Text>
-                <Text style={style.resultItemText}>{item.region}</Text>
-              </TouchableOpacity>
-            ))}
+            {selectedCategory === 'WILDFIRE' &&
+              wildFireData?.wildfires.map(item => (
+                <TouchableOpacity key={`${item.id}`} style={style.resultListItem} activeOpacity={1}>
+                  <Text style={style.resultItemDateText}>
+                    {item.ignitionDateTime.substring(0, 16)}
+                  </Text>
+                  <Text style={style.resultItemText}>{item.address}</Text>
+                </TouchableOpacity>
+              ))}
+            {selectedCategory === 'EARTHQUAKE' &&
+              earthquakeData?.earthquakes.map(item => (
+                <TouchableOpacity key={`${item.id}`} style={style.resultListItem} activeOpacity={1}>
+                  <Text style={style.resultItemDateText}>
+                    {item.occurrenceTime.substring(0, 16)}
+                  </Text>
+                  <Text style={style.resultItemText}>{item.position}</Text>
+                  <View style={style.resultEarthquakeContainer}>
+                    <Text style={style.resultEarthquakeMessageText}>{item.refMatter}</Text>
+                    <Text style={style.resultItemScaleText}>규모 {item.scale}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
           </View>
         </View>
       </ScrollView>
@@ -238,5 +226,17 @@ const style = StyleSheet.create({
   },
   resultItemText: {
     fontSize: 16,
+  },
+  resultItemScaleText: {
+    fontSize: 15,
+  },
+  resultEarthquakeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  resultEarthquakeMessageText: {
+    fontSize: 14,
+    color: theme.color.darkGray2,
   },
 });
